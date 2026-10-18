@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f9f7" />
+    <meta
+      name="description"
+      content="그림과 소리로 단서를 살펴보는 우리 동네 꼬마 탐정 교실. 학생의 속도에 맞춰 함께 찾아요."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>꼬마 탐정단 · 그림카드 탐정 교실</title>
+    <style>
+      #startup {
+        min-height: 100vh;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 18px;
+        padding: 28px;
+        text-align: center;
+        background: #f8f9f6;
+        color: #283e35;
+        font-family: system-ui, sans-serif;
+      }
+      #startup * {
+        box-sizing: border-box;
+      }
+      #startup .startup-icon {
+        width: 76px;
+        height: 76px;
+        border-radius: 24px;
+        background: #e4eddb;
+        color: #286c57;
+        display: grid;
+        place-content: center;
+      }
+      #startup h1 {
+        font-size: 25px;
+        margin: 0;
+        line-height: 1.6;
+      }
+      #startup p {
+        max-width: 340px;
+        margin: 0;
+        color: #66775d;
+        line-height: 1.9;
+        font-size: 14px;
+      }
+      #startup button {
+        border: 0;
+        border-radius: 10px;
+        padding: 14px 22px;
+        background: #286c57;
+        color: white;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        min-height: 48px;
+      }
+      #startup button:focus-visible {
+        outline: 3px solid #286c57;
+        outline-offset: 5px;
+      }
+      #startup [hidden] {
+        display: none;
+      }
+      #startup a {
+        color: #286c57;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.8;
+      }
+      .skip-link {
+        position: fixed;
+        left: 20px;
+        top: -100px;
+        z-index: 100;
+      }
+      .skip-link:focus {
+        top: 10px;
+        background: white;
+        padding: 14px;
+        border: 2px solid #286c57;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+    <div id="app">
+      <section id="startup" aria-labelledby="startup-title">
+        <span class="startup-icon" aria-hidden="true"
+          ><svg
+            width="38"
+            height="38"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+          >
+            <circle cx="10" cy="10" r="7" />
+            <path d="m16 16 5 5M7 10h6m-3-3v6" /></svg
+        ></span>
+        <h1 id="startup-title">탐정 교실을 열고 있어요</h1>
+        <p id="startup-message" role="status">
+          그림과 단서를 준비하고 있어요.<br />잠시만 기다려 주세요.
+        </p>
+        <button id="startup-retry" type="button" hidden>다시 불러오기</button>
+        <a id="startup-standalone" href="./preview.html" hidden
+          >HTML 실행본으로 열기</a
+        >
+      </section>
+    </div>
+    <noscript
+      ><p style="padding: 24px; text-align: center; font-family: system-ui">
+        탐정 교실을 사용하려면 브라우저에서 자바스크립트를 허용해 주세요.
+      </p></noscript
+    >
+    <script>
+      // Keep a useful screen visible even if the app entry cannot be loaded.
+      (() => {
+        const failed = () => {
+          const startup = document.getElementById("startup");
+          if (!startup) return;
+          document.getElementById("startup-title").textContent =
+            "교실을 불러오지 못했어요";
+          document.getElementById("startup-message").textContent =
+            "아래 버튼을 눌러 다시 열어 주세요. 계속 열리지 않으면 선생님께 알려 주세요.";
+          document.getElementById("startup-retry").hidden = false;
+          const standalone = document.getElementById("startup-standalone");
+          if (standalone) standalone.hidden = false;
+        };
+        document
+          .getElementById("startup-retry")
+          .addEventListener("click", () => location.reload());
+        window.addEventListener("error", failed, true);
+        window.addEventListener("unhandledrejection", failed);
+        setTimeout(failed, 10000);
+      })();
+    </script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
