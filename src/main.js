@@ -646,7 +646,7 @@ app.addEventListener("click", (event) => {
     render();
     const clue = clues[currentCase().clues[r.focusClue]];
     speak(
-      `${helpNames[r.helpLevel]}. ${clue.text} ${r.helpLevel >= 2 ? `친구들의 ${clue.part} 부분을 살펴봐요.` : ""}`,
+      `${clue.text}${r.helpLevel >= 2 ? ` 친구들의 ${clue.part} 부분을 살펴봐요.` : ""}`,
     );
     document
       .querySelector(`[data-action="${action}"]`)

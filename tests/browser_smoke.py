@@ -77,11 +77,18 @@ with sync_playwright() as p:
 
     # All four support levels, including a comparison crop for every candidate.
     page.locator('[data-action="clue"][data-index="1"]').click()
+    clue_sentence = page.evaluate('window.__spoken.at(-1)')
     for level in range(1, 5):
         page.locator('[data-action="help"]').click()
         expect(page.locator('.help-panel-title')).to_contain_text(f'{level}단계')
+        spoken = page.evaluate('window.__spoken.at(-1)')
+        assert spoken.startswith(clue_sentence)
+        assert page.locator('.help-panel-title strong').inner_text() not in spoken
+        assert f'{level}단계' not in spoken
         if level >= 3:
             expect(page.locator('.comparison-person')).to_have_count(3)
+    page.locator('[data-action="help"]').click()
+    assert page.evaluate('window.__spoken.at(-1)') == spoken
     assert page.locator('.person-faded').count() >= 1
     page.screenshot(path=str(OUT / 'desktop-help.png'), full_page=True)
     correct_choice(page).click()
