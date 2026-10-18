@@ -2,6 +2,7 @@ import "@fontsource-variable/noto-sans-kr";
 import "./style.css";
 import "./classroom.css";
 import "./ui-refinements.css";
+import "./feedback.css";
 import {
   characters,
   cases,
@@ -251,11 +252,11 @@ function game() {
       const wrong =
         !round.solved &&
         round.attempts.some((a) => a.personId === id && !a.correct);
-      return `<button class="person-card ${round.selected === id ? "person-selected" : ""} ${round.solved && id === item.answer ? "person-correct" : ""} ${faded ? "person-faded" : ""}" data-action="person" data-person="${id}" aria-label="${person.name}. ${person.description}${faded ? ". 지금 단서와 달라요" : ""}" aria-pressed="${round.selected === id}" ${round.solved ? "disabled" : ""}>${round.selected === id && !wrong ? `<span class="person-check" aria-hidden="true">${icon("check", 22)}</span>` : ""}<div class="person-portrait" style="--portrait:${person.color}">${avatar(person, round.helpLevel >= 2 && !round.solved ? focus.part : "")}</div><span class="person-name">${person.name}</span><span class="person-status">${faded ? "단서와 달라요" : wrong ? "다시 비교해요" : config.confirmAnswer && round.selected === id && !round.solved ? "선택했어요" : ""}</span></button>`;
+      return `<button class="person-card ${round.selected === id ? "person-selected" : ""} ${round.solved && id === item.answer ? "person-correct" : ""} ${wrong && round.selected === id ? "person-retry" : ""} ${faded ? "person-faded" : ""}" data-action="person" data-person="${id}" aria-label="${person.name}. ${person.description}${faded ? ". 지금 단서와 달라요" : ""}" aria-pressed="${round.selected === id}" ${round.solved ? "disabled" : ""}>${round.selected === id && !wrong ? `<span class="person-check" aria-hidden="true">${icon("check", 22)}</span>` : wrong && round.selected === id ? `<span class="person-retry-mark" aria-hidden="true">${icon("search", 22)}</span>` : ""}<div class="person-portrait" style="--portrait:${person.color}">${avatar(person, round.helpLevel >= 2 && !round.solved ? focus.part : "")}</div><span class="person-name">${person.name}</span><span class="person-status">${faded ? "단서와 달라요" : wrong ? "다시 비교해요" : config.confirmAnswer && round.selected === id && !round.solved ? "선택했어요" : ""}</span></button>`;
     })
     .join(
       "",
-    )}</div></section></div>${round.solved ? `<section class="answer-feedback" aria-label="정답 확인"><span class="feedback-star">${icon("star", 26)}</span><div><h3>맞아요! ${winner.name} 친구를 찾았어요.</h3></div>${button(session.index === session.rounds.length - 1 ? "오늘의 발견 보기" : "다음 이야기", "next", "button primary", "arrow")}</section>` : `<div class="game-bottom">${incorrect ? `<div class="encouragement retry-message" role="status">${icon("search", 22)}<span>단서를 다시 볼까요?</span></div>` : ""}<div class="game-bottom-actions">${config.maxHelp > 0 ? button(round.helpLevel ? (round.helpLevel >= config.maxHelp ? "도움 다시 듣기" : "도움 더 받기") : "도와주세요", "help", "button help-button", "search") : ""}${config.confirmAnswer ? button("이 사람이에요", "submit", "button primary", "check", round.selected ? "" : "disabled") : ""}</div></div>`}`;
+    )}</div></section></div>${round.solved ? `<section class="answer-feedback" aria-label="정답 확인"><span class="feedback-star">${icon("star", 26)}</span><div><h3>맞아요! ${winner.name} 친구를 찾았어요.</h3></div>${button(session.index === session.rounds.length - 1 ? "오늘의 발견 보기" : "다음 이야기", "next", "button primary", "arrow")}</section>` : `<div class="game-bottom">${incorrect ? `<div class="encouragement retry-message" role="status">${icon("search", 22)}<span>괜찮아요. 다시 살펴봐요.</span></div>` : ""}<div class="game-bottom-actions">${config.maxHelp > 0 ? button(round.helpLevel ? (round.helpLevel >= config.maxHelp ? "도움 다시 듣기" : "도움 더 받기") : "도와주세요", "help", "button help-button", "search") : ""}${config.confirmAnswer ? button("이 사람이에요", "submit", "button primary", "check", round.selected ? "" : "disabled") : ""}</div></div>`}`;
 }
 
 function totals(list) {
@@ -308,7 +309,7 @@ function settingsPreview(config) {
     .map((person) => `<span>${avatar(person)}</span>`)
     .join(
       "",
-    )}</div><dl class="preview-values"><div><dt>선택 인물</dt><dd>${config.choices}<small>명</small></dd></div><div><dt>그림 단서</dt><dd>${config.clueCount}<small>개</small></dd></div><div><dt>수업 분량</dt><dd>${config.sessionLength}<small>문제</small></dd></div><div><dt>도움 단계</dt><dd>${config.maxHelp ? `<small>최대</small> ${config.maxHelp}<small>단계</small>` : "없음"}</dd></div></dl><div class="preview-flags"><span>${icon("sound", 18)} 자동 읽기 <strong>${config.autoVoice ? "켜짐" : "꺼짐"}</strong></span><span>${icon("check", 18)} 답 한 번 더 확인 <strong>${config.confirmAnswer ? "켜짐" : "꺼짐"}</strong></span></div>`;
+    )}</div><dl class="preview-values"><div><dt>선택 인물</dt><dd>${config.choices}<small>명</small></dd></div><div><dt>그림 단서</dt><dd>${config.clueCount}<small>개</small></dd></div><div><dt>수업 분량</dt><dd>${config.sessionLength}<small>문제</small></dd></div><div><dt>도움 단계</dt><dd>${config.maxHelp ? `<small>최대</small> ${config.maxHelp}<small>단계</small>` : "없음"}</dd></div></dl><div class="preview-flags"><span>${icon("sound", 18)} 자동 읽기 <strong>${config.autoVoice ? "켜짐" : "꺼짐"}</strong></span><span>${icon("check", 18)} 답 한 번 더 확인 <strong>${config.confirmAnswer ? "켜짐" : "꺼짐"}</strong></span><span>${icon("heart", 18)} 정답·재시도 음성 <strong>${config.feedbackVoice ? "켜짐" : "꺼짐"}</strong></span></div>`;
 }
 function settingsPage() {
   const dirty = settingsDirty();
@@ -335,7 +336,7 @@ function settingsPage() {
       value: n,
       label: n === 0 ? "없음" : `${n}단계`,
     })),
-  )}</div><div class="settings-toggles">${toggleSetting("autoVoice", "자동 읽기", "문제와 단서를 소리로 읽어요.")}${toggleSetting("confirmAnswer", "답 한 번 더 확인", "친구를 고른 뒤 확인 버튼을 눌러요.")}</div><div class="settings-save-area"><div class="settings-save-status"><span class="save-state ${dirty ? "is-dirty" : ""}" data-save-state role="status">${icon(dirty ? "info" : "check", 17)} ${dirty ? "저장되지 않음" : "저장됨"}</span><p>다음에 시작하는 수업부터 적용돼요.</p></div><div class="settings-actions">${button("기본값", "reset-settings", "button secondary")}<button type="submit" class="button primary">${icon("check", 22)} 설정 저장하기</button></div></div></form><aside class="settings-preview-panel" aria-label="설정 미리보기" aria-live="polite" aria-atomic="true">${settingsPreview(draft)}</aside></div>`;
+  )}</div><div class="settings-toggles">${toggleSetting("autoVoice", "자동 읽기", "문제와 단서를 소리로 읽어요.")}${toggleSetting("confirmAnswer", "답 한 번 더 확인", "친구를 고른 뒤 확인 버튼을 눌러요.")}${toggleSetting("feedbackVoice", "정답·재시도 음성", "답을 고르면 짧게 격려해요.")}</div><div class="settings-save-area"><div class="settings-save-status"><span class="save-state ${dirty ? "is-dirty" : ""}" data-save-state role="status">${icon(dirty ? "info" : "check", 17)} ${dirty ? "저장되지 않음" : "저장됨"}</span><p>다음에 시작하는 수업부터 적용돼요.</p></div><div class="settings-actions">${button("기본값", "reset-settings", "button secondary")}<button type="submit" class="button primary">${icon("check", 22)} 설정 저장하기</button></div></div></form><aside class="settings-preview-panel" aria-label="설정 미리보기" aria-live="polite" aria-atomic="true">${settingsPreview(draft)}</aside></div>`;
 }
 
 function recordsPage() {
@@ -478,23 +479,13 @@ function answer(personId) {
   session.rounds[session.index] = recordAttempt(round, personId, item.answer);
   persistActive();
   render();
-  const name = characters.find((p) => p.id === item.answer).name;
   const correct = currentRound().solved;
-  if (session.settings.autoVoice)
-    speak(
-      correct
-        ? `맞아요! ${name} 친구를 찾았어요. ${item.clues
-            .slice(0, session.settings.clueCount)
-            .map((t) => clues[t].text)
-            .join(" ")}`
-        : "괜찮아요. 그림 단서와 다시 비교해 볼까요?",
-    );
-  else
-    announce(
-      correct
-        ? `맞아요! ${name} 친구를 찾았어요. 단서와 같아요.`
-        : "괜찮아요. 그림 단서와 다시 비교해 볼까요?",
-    );
+  playAnswerFeedback(correct, personId);
+  const message = correct
+    ? "맞아요! 잘 찾았어요."
+    : "괜찮아요. 단서를 다시 볼까요?";
+  if (session.settings.feedbackVoice !== false) speak(message);
+  else announce(message);
   if (correct)
     document
       .querySelector('[data-action="next"]')
@@ -504,6 +495,19 @@ function answer(personId) {
       .querySelector(`[data-person="${personId}"]`)
       ?.focus({ preventScroll: true });
 }
+function playAnswerFeedback(correct, personId) {
+  const targets = [
+    document.querySelector(`[data-person="${personId}"]`),
+    document.querySelector(correct ? ".answer-feedback" : ".retry-message"),
+  ].filter(Boolean);
+  for (const target of targets) {
+    target.classList.add("feedback-enter");
+    // The class is transient; changing clues or returning to the lesson
+    // must not replay feedback for a previously submitted answer.
+    setTimeout(() => target.classList.remove("feedback-enter"), 900);
+  }
+}
+
 function openModal(type) {
   returnFocus = document.activeElement;
   modal = type;

@@ -92,6 +92,11 @@ with sync_playwright() as p:
         gear=page.locator('.teacher-button').bounding_box()
         assert gear['x']+gear['width']>=width-50 and gear['y']<30
         page.locator('.page-intro [data-page="game"]').tap()
+        answer_id=correct(page).get_attribute('data-person')
+        page.locator(f'.person-card:not([data-person="{answer_id}"])').first.tap()
+        page.locator('[data-action="submit"]').tap()
+        expect(page.locator('.retry-message')).to_be_visible()
+        fits(page,['.person-card','.game-bottom','.retry-message','.person-retry-mark','[data-action="help"]','[data-action="submit"]'],'retry '+str((width,height)))
         correct(page).tap()
         page.locator('[data-action="submit"]').tap()
         fits(page,['.person-card','.answer-feedback','[data-action="next"]'],'answer '+str((width,height)))

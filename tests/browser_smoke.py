@@ -71,8 +71,14 @@ with sync_playwright() as p:
     answer = ANSWERS[active(page)['rounds'][0]['caseId']]
     page.locator(f'.person-card:not([data-person="{answer}"])').first.click()
     expect(page.locator('.retry-message')).to_be_visible()
+    expect(page.locator('.person-retry-mark')).to_be_visible()
+    assert page.evaluate('window.__spoken.at(-1)') == '괜찮아요. 단서를 다시 볼까요?'
+    assert not active(page)['rounds'][0]['solved']
     correct_choice(page).click()
     expect(page.locator('.answer-feedback')).to_contain_text('맞아요!')
+    expect(page.locator('.person-correct .person-check')).to_be_visible()
+    assert page.evaluate('window.__spoken.at(-1)') == '맞아요! 잘 찾았어요.'
+    assert page.locator('.person-correct').evaluate('el=>getComputedStyle(el).animationName') == 'none'
     page.locator('[data-action="next"]').click()
 
     # All four support levels, including a comparison crop for every candidate.
@@ -136,6 +142,7 @@ with sync_playwright() as p:
         page.locator(f'input[name="{name}"][value="{value}"]').check()
     page.locator('#confirmAnswer').check()
     page.locator('#autoVoice').check()
+    page.locator('#feedbackVoice').uncheck()
     expect(page.locator('[data-save-state]')).to_have_text('저장되지 않음')
     expect(page.locator('.preview-values dd')).to_have_text(['4명', '1개', '5문제', '최대 2단계'])
     assert page.evaluate("localStorage.getItem('detective.settings.v1')") == original_settings
@@ -152,6 +159,7 @@ with sync_playwright() as p:
     navigate(page, 'settings')
     expect(page.locator('input[name="choices"][value="4"]')).to_be_checked()
     expect(page.locator('#confirmAnswer')).to_be_checked()
+    expect(page.locator('#feedbackVoice')).not_to_be_checked()
     page.screenshot(path=str(OUT / 'desktop-settings.png'), full_page=True)
     navigate(page, 'home')
     page.locator('.session-strip [data-action="start"]').click()
@@ -161,8 +169,10 @@ with sync_playwright() as p:
     expect(page.locator('[data-action="submit"]')).to_be_disabled()
     correct_choice(page).click()
     assert not page.locator('.answer-feedback').count()
+    spoken_before_submit = page.evaluate('window.__spoken.length')
     page.locator('[data-action="submit"]').click()
     expect(page.locator('.answer-feedback')).to_be_visible()
+    assert page.evaluate('window.__spoken.length') == spoken_before_submit, 'muting feedback preserves visual feedback while automatic question reading stays enabled'
     page.locator('[data-action="next"]').click()
     page.locator('[data-action="help"]').click()
     page.locator('[data-action="help"]').click()

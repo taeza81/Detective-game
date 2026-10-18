@@ -59,6 +59,20 @@ test("Incomplete saved lessons are rejected without throwing during startup", ()
     true,
     "existing valid progress is retained",
   );
+  const legacy = structuredClone(answered);
+  delete legacy.settings.feedbackVoice;
+  assert.equal(isValidSession(legacy), true, "older progress remains valid");
+  assert.equal(
+    sanitizeSettings(legacy.settings).feedbackVoice,
+    true,
+    "older lessons receive the default answer voice",
+  );
+  legacy.settings.feedbackVoice = "false";
+  assert.equal(
+    isValidSession(legacy),
+    false,
+    "invalid voice settings are rejected",
+  );
 });
 
 test("Every case and difficulty has exactly one matching candidate", () => {
@@ -158,6 +172,7 @@ test("Malformed or old settings fall back to supported settings", () => {
       maxHelp: -1,
       sessionLength: "5",
       autoVoice: "false",
+      feedbackVoice: "false",
     }),
     defaultSettings,
   );
@@ -168,6 +183,7 @@ test("Malformed or old settings fall back to supported settings", () => {
       sessionLength: 5,
       maxHelp: 0,
       autoVoice: true,
+      feedbackVoice: false,
       confirmAnswer: true,
     }),
     {
@@ -176,6 +192,7 @@ test("Malformed or old settings fall back to supported settings", () => {
       sessionLength: 5,
       maxHelp: 0,
       autoVoice: true,
+      feedbackVoice: false,
       confirmAnswer: true,
     },
   );

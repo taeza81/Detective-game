@@ -1,0 +1,120 @@
+/* Answer feedback stays beside the activity and never blocks another touch. */
+.person-correct {
+  border-color: #287451;
+  background: #edf7ed;
+  box-shadow: inset 0 0 0 2px #287451;
+}
+.person-retry,
+.person-retry:hover:not(:disabled) {
+  border-color: #b58d4e;
+  background: #fffaf0;
+  box-shadow: inset 0 0 0 1px #b58d4e;
+}
+.person-retry .person-status {
+  color: #74531f;
+  font-weight: 600;
+}
+.person-retry-mark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #74531f;
+  background: #ffedbc;
+  z-index: 1;
+}
+.answer-feedback {
+  background: #edf7ed;
+  border-color: #c5ddc5;
+}
+.answer-feedback .feedback-star {
+  color: #76551f;
+  background: #ffedbc;
+  flex-shrink: 0;
+}
+.retry-message {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: #fff3d7;
+  color: #74531f;
+  line-height: 1.5;
+  min-width: 0;
+}
+.retry-message > svg {
+  flex-shrink: 0;
+}
+.person-correct.feedback-enter {
+  animation: answer-success 700ms ease-out 1;
+}
+.person-correct.feedback-enter .person-check,
+.answer-feedback.feedback-enter .feedback-star {
+  animation: answer-check 700ms ease-out 1;
+}
+.person-retry.feedback-enter,
+.retry-message.feedback-enter {
+  animation: answer-retry 600ms ease-out 1;
+}
+@keyframes answer-success {
+  from {
+    box-shadow: inset 0 0 0 7px #8bbb80;
+  }
+  to {
+    box-shadow: inset 0 0 0 2px #287451;
+  }
+}
+@keyframes answer-check {
+  0% {
+    transform: scale(0.85);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes answer-retry {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.settings-toggles {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+@media (min-width: 700px) and (max-width: 1199px) {
+  .settings-toggles .toggle-row > div > label {
+    font-size: 16px;
+  }
+  .settings-toggles {
+    gap: 14px;
+  }
+}
+@media (max-width: 699px) {
+  .settings-toggles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .game-bottom:has(.retry-message) {
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+  .retry-message {
+    width: 100%;
+    padding: 6px 9px;
+    font-size: 14px;
+  }
+  .person-retry-mark {
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+  }
+}

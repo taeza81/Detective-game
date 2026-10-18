@@ -344,6 +344,7 @@ export const defaultSettings = {
   clueCount: 3,
   sessionLength: 3,
   autoVoice: false,
+  feedbackVoice: true,
   maxHelp: 4,
   confirmAnswer: false,
 };
@@ -453,7 +454,7 @@ export function sanitizeSettings(value) {
   })) {
     if (options.includes(value[key])) clean[key] = value[key];
   }
-  for (const key of ["autoVoice", "confirmAnswer"])
+  for (const key of ["autoVoice", "feedbackVoice", "confirmAnswer"])
     if (typeof value[key] === "boolean") clean[key] = value[key];
   return clean;
 }
@@ -478,7 +479,9 @@ export function isValidSession(value) {
   const settings = sanitizeSettings(value.settings);
   if (
     !Object.entries(settings).every(
-      ([key, expected]) => value.settings[key] === expected,
+      ([key, expected]) =>
+        value.settings[key] === expected ||
+        (key === "feedbackVoice" && value.settings[key] === undefined),
     ) ||
     value.rounds.length !== settings.sessionLength ||
     value.index < 0 ||
