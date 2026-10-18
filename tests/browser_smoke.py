@@ -117,9 +117,9 @@ with sync_playwright() as p:
     expect(page.locator('.session-strip [data-action="start"]')).to_be_visible()
     assert not page.locator('[data-action="resume"]').count()
     navigate(page, 'records')
-    page.locator('.session-record summary').click()
+    page.locator('.session-record > summary').click()
     expect(page.locator('.round-record')).to_have_count(3)
-    for label in ['다시 살펴본 뒤 성공', '도움 후 성공', '독립 첫 선택 성공']:
+    for label in ['다시 선택해 성공', '도움받아 성공', '첫 선택 성공']:
         expect(page.locator('.record-detail')).to_contain_text(label)
     with page.expect_download() as info:
         page.locator('[data-action="export"]').click()
@@ -127,6 +127,7 @@ with sync_playwright() as p:
     info.value.save_as(csv_path)
     csv_rows = list(csv.reader(io.StringIO(csv_path.read_text(encoding='utf-8-sig'))))
     assert len(csv_rows) == 4 and csv_rows[0][0] == '수업 시작'
+    assert [row[-2] for row in csv_rows[1:]] == ['다시 살펴본 뒤 성공', '도움 후 성공', '독립 첫 선택 성공']
     page.screenshot(path=str(OUT / 'desktop-records.png'), full_page=True)
     page.reload(wait_until='networkidle')
     navigate(page, 'records')

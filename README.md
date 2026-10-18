@@ -26,6 +26,7 @@ npm run dev -- --port 5173
 - 인물을 누르면 답을 제출하거나, 별도의 확인 버튼으로 제출하도록 설정
 - 독립 첫 선택 성공 / 도움 후 성공 / 도움 없이 재시도 후 성공을 구분한 학습 기록
 - 첫 응답, 응답별 도움 단계, 최종 응답, 중간 마침 기록과 한국어 CSV 내려받기
+- 읽기 쉬운 기록 요약, 최근 수업순 목록, 첫 선택·도움·최종 응답과 펼쳐 보는 응답 과정
 - 새로고침 후 진행 중인 수업 이어하기
 - 가로 태블릿·16:9 전자칠판에서 교실, 문제 풀이, 도움, 결과 화면을 스크롤 없이 사용
 - 이야기 목록의 이전·다음 버튼으로 12개 상황 탐색
@@ -74,6 +75,7 @@ npm run preview -- --port 4173
 ```sh
 python3 tests/browser_smoke.py
 python3 tests/browser_classroom.py
+python3 tests/browser_records.py
 python3 tests/browser_startup.py
 # 배포 빌드 미리보기 서버를 검증하려면:
 DETECTIVE_BASE_URL=http://127.0.0.1:4173 python3 tests/browser_smoke.py
@@ -116,8 +118,10 @@ npm run build:pages
 - `src/classroom.css`: 화면 높이에 맞춘 터치 수업 레이아웃
 - `src/ui-refinements.css`: 학생 화면의 글자 크기와 간결한 교사 설정 패널
 - `src/feedback.css`: 정답·재시도 표시와 짧은 강조 효과
+- `src/records.css`: 교사용 기록 요약·수업 목록·응답 이력 화면
 - `tests/game.test.js`: 핵심 학습 로직 검증
 - `tests/browser_smoke.py`: 실제 브라우저 기능 검증
 - `tests/browser_classroom.py`: 여러 16:9 해상도의 터치·스크롤·전체화면 검증
+- `tests/browser_records.py`: 기록 화면의 줄바꿈·긴 응답 과정·미완료 기록·CSV·삭제 검증
 
 새로운 상황이나 의상을 추가할 때에는 인물의 `tags`, 설명, 그림이 일치하도록 수정하고 `npm test`를 실행하세요. 그림은 SVG 뷰포트와 클립으로 표시하므로 원본 이미지를 변형하지 않고도 개별 상황·단서를 보여 줍니다. 단일 HTML 실행본에는 이미지도 함께 포함됩니다.

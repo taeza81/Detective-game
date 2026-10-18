@@ -3,6 +3,7 @@ import "./style.css";
 import "./classroom.css";
 import "./ui-refinements.css";
 import "./feedback.css";
+import "./records.css";
 import {
   characters,
   cases,
@@ -178,7 +179,7 @@ function navigation() {
   ]
     .map(
       (n) =>
-        `<button class="nav-item ${page === n.id ? "active" : ""}" data-action="nav" data-page="${n.id}" ${page === n.id ? 'aria-current="page"' : ""}>${icon(n.icon, 20)}<span>${n.label}</span></button>`,
+        `<button class="nav-item ${page === n.id ? "active" : ""}" data-action="nav" data-page="${n.id}" aria-label="${n.label}" ${page === n.id ? 'aria-current="page"' : ""}>${icon(n.icon, 20)}<span>${n.label}</span></button>`,
     )
     .join("")}</nav>`;
 }
@@ -274,6 +275,7 @@ function totals(list) {
 }
 function formatDate(date) {
   return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
     month: "long",
     day: "numeric",
     hour: "2-digit",
@@ -339,50 +341,80 @@ function settingsPage() {
   )}</div><div class="settings-toggles">${toggleSetting("autoVoice", "자동 읽기", "문제와 단서를 소리로 읽어요.")}${toggleSetting("confirmAnswer", "답 한 번 더 확인", "친구를 고른 뒤 확인 버튼을 눌러요.")}${toggleSetting("feedbackVoice", "정답·재시도 음성", "답을 고르면 짧게 격려해요.")}</div><div class="settings-save-area"><div class="settings-save-status"><span class="save-state ${dirty ? "is-dirty" : ""}" data-save-state role="status">${icon(dirty ? "info" : "check", 17)} ${dirty ? "저장되지 않음" : "저장됨"}</span><p>다음에 시작하는 수업부터 적용돼요.</p></div><div class="settings-actions">${button("기본값", "reset-settings", "button secondary")}<button type="submit" class="button primary">${icon("check", 22)} 설정 저장하기</button></div></div></form><aside class="settings-preview-panel" aria-label="설정 미리보기" aria-live="polite" aria-atomic="true">${settingsPreview(draft)}</aside></div>`;
 }
 
+function recordOutcome(round) {
+  return {
+    "독립 첫 선택 성공": { label: "첫 선택 성공", tone: "independent" },
+    "다시 살펴본 뒤 성공": { label: "다시 선택해 성공", tone: "retried" },
+    "도움 후 성공": { label: "도움받아 성공", tone: "supported" },
+    미완료: { label: "미완료", tone: "unfinished" },
+  }[getOutcome(round)];
+}
+
+function recordRound(round, index) {
+  const item = cases.find((c) => c.id === round.caseId);
+  const first = round.attempts[0];
+  const last = round.attempts.at(-1);
+  const outcome = recordOutcome(round);
+  const personName = (id) => characters.find((p) => p.id === id).name;
+  const response = (attempt) =>
+    `${personName(attempt.personId)}<span class="record-response-note">${attempt.correct ? "맞음" : "다시 선택"}</span>`;
+  return `<article class="round-record"><div class="round-record-heading"><span aria-label="${index + 1}번 문제">${index + 1}</span><h3>${item.title}</h3><span class="outcome ${outcome.tone}">${outcome.label}</span></div>${first ? `<dl><div><dt>첫 선택</dt><dd>${response(first)}</dd></div><div><dt>사용한 도움</dt><dd>${round.helpLevel ? `<strong>${round.helpLevel}단계</strong><span class="record-response-note">${helpNames[round.helpLevel]}</span>` : "도움 없음"}</dd></div><div><dt>최종 응답</dt><dd>${response(last)}</dd></div></dl><details class="attempt-history"><summary>${icon("chart", 18)}<span>응답 과정 <strong>${round.attempts.length}회</strong></span><span class="attempt-chevron" aria-hidden="true">${icon("arrow", 16)}</span></summary><ol class="attempt-list">${round.attempts.map((attempt, i) => `<li><span class="attempt-order" aria-hidden="true">${i + 1}</span><strong>${personName(attempt.personId)}</strong><span class="attempt-result">${attempt.correct ? "맞음" : "다시 선택"}</span><span class="attempt-help">${attempt.helpLevel ? `도움 ${attempt.helpLevel}단계` : "도움 없음"}</span></li>`).join("")}</ol></details>` : `<div class="unanswered-note">${icon("info", 18)}<span>아직 응답하지 않은 문제예요.${round.helpLevel ? `<strong>사용한 도움: ${round.helpLevel}단계 · ${helpNames[round.helpLevel]}</strong>` : ""}</span></div>`}</article>`;
+}
+
+function recordSession(record) {
+  const solved = record.rounds.filter((round) => round.solved).length;
+  const responded = record.rounds.filter(
+    (round) => round.attempts.length,
+  ).length;
+  return `<details class="session-record"><summary><div class="record-session-main"><span class="record-book">${icon("book", 24)}</span><div class="record-session-title"><strong><time datetime="${escape(record.startedAt)}">${escape(formatDate(record.startedAt))}</time></strong><div class="record-session-meta"><span>인물 ${record.settings.choices}명</span><span>단서 ${record.settings.clueCount}개</span><span>${record.rounds.length}문제</span></div></div></div><span class="session-status ${record.status === "stopped" ? "stopped" : ""}">${record.status === "stopped" ? "중간 마침" : "수업 완료"}</span><span class="record-score"><strong>${solved}<small> / ${record.rounds.length}</small></strong><span>맞힌 문제</span></span><span class="record-disclosure"><span class="when-closed">자세히 보기</span><span class="when-open">접기</span><span class="details-chevron" aria-hidden="true">${icon("arrow", 18)}</span></span></summary><div class="record-detail"><p class="record-response-count">응답한 문제 <strong>${responded} / ${record.rounds.length}</strong></p>${record.rounds.map(recordRound).join("")}</div></details>`;
+}
+
 function recordsPage() {
   const stats = totals(records);
-  return `<section class="page-intro"><div><div class="eyebrow">LITTLE STEPS, BIG DISCOVERIES</div><h1>차곡차곡, 우리의 발견</h1><p>정답뿐 아니라 단서를 살펴본 과정도 함께 기록해요.</p></div><div class="record-actions">${button("기록 내려받기", "export", "button secondary compact", "download", records.length ? "" : "disabled")}${button("기록 삭제", "clear-records", "icon-button danger", "trash", `aria-label="모든 학습 기록 삭제" ${records.length ? "" : "disabled"}`)}</div></section><div class="record-stats">${[
-    { value: records.length, name: "진행한 수업", icon: "book", color: "sage" },
+  const metrics = [
+    {
+      value: records.length,
+      unit: "회",
+      name: "진행한 수업",
+      note: "완료·중간 마침 포함",
+      icon: "book",
+      color: "sage",
+    },
     {
       value: stats.independent,
-      name: "독립 첫 선택 성공",
+      unit: "문제",
+      name: "첫 선택 성공",
+      note: "도움 없이 한 번에 찾음",
       icon: "star",
       color: "yellow",
     },
-    { value: stats.helped, name: "도움 후 성공", icon: "hand", color: "blue" },
     {
       value: stats.retried,
-      name: "다시 살펴본 뒤 성공",
+      unit: "문제",
+      name: "다시 선택해 성공",
+      note: "도움 없이 다시 골라 찾음",
       icon: "search",
       color: "pink",
     },
-  ]
-    .map(
-      (s) =>
-        `<div class="record-stat"><span class="stat-icon ${s.color}">${icon(s.icon, 25)}</span><div><strong>${s.value}<small>${s.name === "진행한 수업" ? "회" : "문제"}</small></strong><p>${s.name}</p></div></div>`,
-    )
-    .join(
-      "",
-    )}</div><div class="records-notice">${icon("info", 18)} ‘독립 첫 선택 성공’은 도움 없이 첫 응답에서 맞힌 경우예요. 다시 선택한 경우와 도움받은 경우는 따로 기록해요.</div>${
+    {
+      value: stats.helped,
+      unit: "문제",
+      name: "도움받아 성공",
+      note: "도움 버튼을 사용해 찾음",
+      icon: "hand",
+      color: "blue",
+    },
+  ];
+  return `<div class="records-page"><section class="page-intro records-header"><div><h1>학습 기록</h1><p>수업 결과와 도움 사용을 살펴보세요.</p></div><div class="record-actions">${button("기록 내려받기", "export", "button secondary", "download", records.length ? "" : "disabled")}${button("전체 기록 삭제", "clear-records", "button secondary record-delete", "trash", `aria-label="모든 학습 기록 삭제" ${records.length ? "" : "disabled"}`)}</div></section><section class="record-stats" aria-label="전체 수업 요약">${metrics.map((metric) => `<article class="record-stat"><div class="record-stat-heading"><h2>${metric.name}</h2><span class="stat-icon ${metric.color}">${icon(metric.icon, 23)}</span></div><strong class="record-stat-value">${metric.value}<small>${metric.unit}</small></strong><p>${metric.note}</p></article>`).join("")}</section>${
     records.length
-      ? `<section class="records-list"><h2>수업 기록 <span class="count">${records.length}</span></h2>${[
+      ? `<section class="records-list" aria-labelledby="records-list-title"><div class="records-list-heading"><h2 id="records-list-title">수업별 기록 <span class="count">${records.length}</span></h2><p>최근 수업부터 표시해요.</p></div>${[
           ...records,
         ]
-          .reverse()
-          .map(
-            (s) =>
-              `<details class="session-record"><summary><span class="record-book">${icon("book", 22)}</span><div><strong>${escape(formatDate(s.startedAt))}</strong><p>${s.settings.choices}명 중 찾기 · 단서 ${s.settings.clueCount}개 · ${s.rounds.length}개 이야기</p></div><span class="session-status ${s.status === "stopped" ? "stopped" : ""}">${s.status === "stopped" ? "중간 마침" : "수업 완료"}</span><span class="record-score">${s.rounds.filter((r) => r.solved).length} / ${s.rounds.length}</span><span class="details-chevron">⌄</span></summary><div class="record-detail">${s.rounds
-                .map((r, i) => {
-                  const item = cases.find((c) => c.id === r.caseId);
-                  const first = r.attempts[0];
-                  const last = r.attempts.at(-1);
-                  return `<article class="round-record"><div class="round-record-heading"><span>${i + 1}</span><h3>${item.title}</h3><span class="outcome ${r.helpLevel ? "supported" : ""}">${getOutcome(r)}</span></div><dl><div><dt>첫 선택</dt><dd>${first ? characters.find((p) => p.id === first.personId).name + (first.correct ? " · 맞음" : " · 다시 비교") : "선택 전"}</dd></div><div><dt>사용한 도움</dt><dd>${helpNames[r.helpLevel]}${r.helpLevel ? ` (${r.helpLevel}단계)` : ""}</dd></div><div><dt>최종 응답</dt><dd>${last ? characters.find((p) => p.id === last.personId).name + (r.solved ? " · 성공" : " · 미완료") : "응답 없음"}</dd></div></dl>${r.attempts.length ? `<p class="attempt-trail">응답 순서: ${r.attempts.map((a) => `${characters.find((p) => p.id === a.personId).name}${a.correct ? " ✓" : ""} (도움 ${a.helpLevel}단계)`).join(" → ")}</p>` : ""}</article>`;
-                })
-                .join("")}</div></details>`,
-          )
+          .sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt))
+          .map(recordSession)
           .join("")}</section>`
-      : `<section class="empty-state"><span>${icon("book", 45)}</span><h2>아직 탐정 수첩이 비어 있어요</h2><p>첫 수업을 마치면 발견한 이야기와<br>도움받은 과정이 여기에 쌓여요.</p>${button("첫 탐정 수업 시작하기", "start", "button primary", "arrow")}</section>`
-  }<p class="local-record-note">${icon("info", 15)} 기록은 이 브라우저에 저장돼요. 브라우저 데이터를 지우면 기록도 삭제돼요. 진행 중인 수업은 마친 뒤 목록에 표시돼요.</p>`;
+      : `<section class="empty-state"><span>${icon("book", 40)}</span><h2>아직 저장된 수업이 없어요</h2><p>수업을 마치면 결과가 여기에 표시돼요.</p>${button("수업 시작하기", "start", "button primary", "arrow")}</section>`
+  }<aside class="record-storage-note" aria-label="기록 보관 안내">${icon("info", 20)}<div><p>기록은 이 브라우저에 저장돼요. 브라우저 데이터를 지우면 기록도 삭제돼요.</p><p>진행 중인 수업은 마친 뒤 목록에 표시돼요.</p></div></aside></div>`;
 }
 
 function renderModal() {
