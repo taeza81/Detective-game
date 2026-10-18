@@ -57,6 +57,12 @@ with sync_playwright() as p:
     page.locator('[data-case="gift"]').click()
     expect(page.locator('.person-card')).to_have_count(3)
     expect(page.locator('.clue-card')).to_have_count(3)
+    # Short picture labels keep the original full-sentence audio.
+    expect(page.locator('.clue-description').first).to_have_text('안경')
+    expect(page.locator('.game-question p, .scene-caption')).to_have_count(0)
+    expect(page.get_by_text('문 앞에 선물을 두고 갔어요.', exact=True)).to_have_count(1)
+    page.locator('[data-action="clue"][data-index="0"]').click()
+    assert '안경을 썼어요.' in page.evaluate('window.__spoken')
     page.locator('[data-action="read-question"]').click()
     assert any('선물을 준 사람' in text for text in page.evaluate('window.__spoken'))
     assert not page.locator('[data-action="next"]').count()
@@ -115,11 +121,26 @@ with sync_playwright() as p:
 
     # Save all settings, reload, and verify the new game uses them.
     navigate(page, 'settings')
+    for removed in ['TEACHER’S DESK', '아이의 속도에 맞춰요', '선택지와 단서, 도움 수준을 조절해 수업을 준비해 주세요.']:
+        expect(page.get_by_text(removed, exact=True)).to_have_count(0)
+    expect(page.locator('[data-save-state]')).to_have_text('저장됨')
+    original_settings = page.evaluate("localStorage.getItem('detective.settings.v1')")
     for name, value in [('choices', 4), ('clueCount', 1), ('sessionLength', 5), ('maxHelp', 2)]:
         page.locator(f'input[name="{name}"][value="{value}"]').check()
     page.locator('#confirmAnswer').check()
     page.locator('#autoVoice').check()
+    expect(page.locator('[data-save-state]')).to_have_text('저장되지 않음')
+    expect(page.locator('.preview-values dd')).to_have_text(['4명', '1개', '5문제', '최대 2단계'])
+    assert page.evaluate("localStorage.getItem('detective.settings.v1')") == original_settings
+    # Help does not discard unsaved changes, and focus returns to its opener.
+    page.locator('[data-action="settings-help"]').click()
+    expect(page.get_by_role('dialog')).to_be_visible()
+    page.keyboard.press('Escape')
+    expect(page.locator('[data-action="settings-help"]')).to_be_focused()
+    expect(page.locator('input[name="choices"][value="4"]')).to_be_checked()
+    expect(page.locator('[data-save-state]')).to_have_text('저장되지 않음')
     page.locator('button[type="submit"]').click()
+    expect(page.locator('[data-save-state]')).to_have_text('저장됨')
     page.reload(wait_until='networkidle')
     navigate(page, 'settings')
     expect(page.locator('input[name="choices"][value="4"]')).to_be_checked()

@@ -134,8 +134,12 @@ export function avatarCrop(person, part) {
     신발: "18 225 144 42",
     가방: "18 73 144 110",
   };
-  return avatar(person).replace(
-    'viewBox="0 0 180 270"',
-    `viewBox="${boxes[part] || boxes["옷"]}"`,
-  );
+  const box = boxes[part] || boxes["옷"];
+  const [x, y, width, height] = box.split(" ");
+  const drawing = avatar(person)
+    .replace(/^<svg[^>]*>/, "")
+    .replace(/<\/svg>$/, "");
+  // Clip the crop itself, including when the outer SVG has letterboxing.
+  // Changing only the outer viewBox leaves other body parts in that space.
+  return `<svg viewBox="${box}" aria-hidden="true" overflow="hidden"><svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="${box}" overflow="hidden">${drawing}</svg></svg>`;
 }

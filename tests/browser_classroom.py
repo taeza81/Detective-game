@@ -23,7 +23,8 @@ def fits(page, selectors, label):
         if(!el.getClientRects().length) continue;
         const r=el.getBoundingClientRect();
         if(r.left<-.5 || r.top<-.5 || r.right>innerWidth+.5 || r.bottom>innerHeight+.5) problems.push(selector+' outside viewport: '+JSON.stringify({x:r.x,y:r.y,w:r.width,h:r.height}));
-        if(['.help-panel','.clues-panel','.candidate-grid','.settings-card'].includes(selector) && el.scrollHeight>el.clientHeight+1) problems.push(selector+' internal content clipped: '+el.scrollHeight+'/'+el.clientHeight);
+        if(el.scrollWidth>el.clientWidth+1) problems.push(selector+' internal content too wide: '+el.scrollWidth+'/'+el.clientWidth);
+        if(['.help-panel','.clues-panel','.candidate-grid','.settings-card','.setting-row','.settings-preview-panel'].includes(selector) && el.scrollHeight>el.clientHeight+1) problems.push(selector+' internal content clipped: '+el.scrollHeight+'/'+el.clientHeight);
       }
       return problems;
     }''', selectors)
@@ -55,6 +56,8 @@ with sync_playwright() as p:
         page.wait_for_load_state('networkidle')
         targets=['.game-top','.scene-slot','.clues-panel','.clue-card','.candidate-grid','.person-card','.game-bottom','[data-action="help"]','[data-action="submit"]','.teacher-button','.fullscreen-button']
         fits(page,targets,'game '+str((width,height)))
+        assert page.locator('.game-question h1').evaluate('el=>parseFloat(getComputedStyle(el).fontSize)') >= 26
+        assert page.locator('.clue-description').first.evaluate('el=>parseFloat(getComputedStyle(el).fontSize)') >= 19
         # Verify images decode, beyond merely observing HTTP 200 or SVG elements.
         decoded=page.evaluate('''async()=>{
           const urls=[...new Set([...document.querySelectorAll('svg image')].map(el=>el.getAttribute('href')))];
@@ -83,7 +86,9 @@ with sync_playwright() as p:
         expect(page.locator('.scene-panel')).to_be_visible()
         assert page.evaluate("JSON.parse(localStorage.getItem('detective.active.v1')).rounds[0].helpLevel")==4
         page.locator('.teacher-button').tap()
-        fits(page,['.settings-card','.setting-row','.settings-actions','button[type="submit"]','.page-intro'], 'settings '+str((width,height)))
+        fits(page,['.settings-card','.setting-row','.option-pill > span','.settings-preview-panel','.settings-actions','button[type="submit"]','.page-intro'], 'settings '+str((width,height)))
+        if width in [1024,1920] and height in [576,1080]:
+            page.screenshot(path=str(OUT/f'classroom-settings-{width}.png'))
         gear=page.locator('.teacher-button').bounding_box()
         assert gear['x']+gear['width']>=width-50 and gear['y']<30
         page.locator('.page-intro [data-page="game"]').tap()
