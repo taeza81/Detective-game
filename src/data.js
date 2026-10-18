@@ -385,6 +385,7 @@ export function makeRound(item, settings, random = Math.random) {
     selected: null,
     attempts: [],
     helpLevel: 0,
+    helpVisible: false,
     focusClue: 0,
     solved: false,
     startedAt: Date.now(),

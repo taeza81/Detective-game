@@ -26,7 +26,7 @@ with sync_playwright() as p:
       localStorage.setItem('detective.active.v1', JSON.stringify(brokenRound));
     }""")
     page.reload(wait_until='networkidle')
-    expect(page.locator('.story-card')).to_have_count(12)
+    expect(page.locator('.story-card')).to_have_count(6)
     page.locator('.nav-item[data-page="records"]').click()
     expect(page.locator('.session-record')).to_have_count(1)
     assert len(page.evaluate("JSON.parse(localStorage.getItem('detective.records.v1'))")) == 4, 'do not delete saved data on load'
@@ -44,7 +44,7 @@ with sync_playwright() as p:
     expect(page.locator('#startup-standalone')).to_be_visible()
     page.unroute('**/src/main.js*')
     page.locator('#startup-retry').click()
-    expect(page.locator('.story-card')).to_have_count(12)
+    expect(page.locator('.story-card')).to_have_count(6)
     print('PASS: blocked application entry displays recovery controls; retry recovers')
     context.close()
 
@@ -62,7 +62,7 @@ with sync_playwright() as p:
             route.abort()
     context.route('**/*', intercept)
     page.goto('http://detective.test/nested/preview.html', wait_until='networkidle')
-    expect(page.locator('.story-card')).to_have_count(12)
+    expect(page.locator('.story-card')).to_have_count(6)
     page.locator('[data-case="gift"]').click()
     page.locator('[data-person="doyun"]').click()
     expect(page.locator('.answer-feedback')).to_be_visible()

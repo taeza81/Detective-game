@@ -1,0 +1,1609 @@
+/* A fixed-height classroom: the activity fits the display, including help. */
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+body {
+  overflow: hidden;
+}
+.workspace {
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  flex: 0 0 68px;
+  height: 68px;
+  padding: 0 28px;
+  gap: 20px;
+}
+.app-navigation,
+.header-nav,
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.brand {
+  padding: 0;
+  gap: 10px;
+}
+.brand > svg {
+  width: 40px;
+}
+.brand > span {
+  font-size: 19px;
+}
+.brand small {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #62765b;
+}
+.header-nav {
+  margin-left: 22px;
+  gap: 8px;
+}
+.nav-item {
+  width: auto;
+  min-height: 46px;
+  padding: 10px 14px;
+  font-size: 13px;
+  gap: 8px;
+}
+.topbar-actions {
+  gap: 10px;
+  margin-left: auto;
+}
+.fullscreen-button {
+  min-height: 48px;
+  padding: 9px 16px;
+  font-size: 14px;
+  border: 1px solid #dbe3d3;
+  background: #fff;
+  color: #385e45;
+}
+.teacher-button {
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 12px;
+  color: #456448;
+}
+.teacher-button > svg {
+  width: 24px;
+  height: 24px;
+}
+#main {
+  width: 100%;
+  max-width: none;
+  padding: 18px 26px;
+  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 14px;
+}
+.page-footer {
+  display: none;
+}
+.page-intro {
+  flex-shrink: 0;
+  margin: 0;
+  min-height: 54px;
+  gap: 14px;
+}
+.page-intro h1 {
+  font-size: clamp(21px, 2.1vw, 32px);
+}
+.page-intro p {
+  margin-top: 4px;
+  font-size: 12px;
+}
+.eyebrow {
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+.discovery-count {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: #62765a;
+  white-space: nowrap;
+}
+.discovery-count strong {
+  font-size: 16px;
+  color: #346345;
+}
+.session-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 15px;
+  border: 1px solid #dfe7d4;
+  background: #eaf1e1;
+  padding: 15px 22px;
+  flex-shrink: 0;
+}
+.session-strip-icon {
+  color: #668556;
+  background: #dce8cf;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+}
+.session-strip h2 {
+  font-size: clamp(16px, 1.7vw, 23px);
+  letter-spacing: -0.6px;
+}
+.session-strip p {
+  font-size: 12px;
+  margin-top: 5px;
+  color: #526845;
+}
+.session-strip .button {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 16px;
+  padding: 13px 22px;
+}
+.story-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+.story-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.filters {
+  margin: 0;
+  gap: 8px;
+}
+.filter {
+  min-height: 44px;
+  font-size: 13px;
+  padding: 9px 17px;
+}
+.filter span {
+  font-size: 11px;
+}
+.small-label {
+  display: block;
+  font-size: 12px;
+  color: #607153;
+}
+.story-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.story-card {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.story-image {
+  aspect-ratio: auto;
+  flex: 1;
+  min-height: 0;
+  margin: 6px 6px 0;
+}
+.story-image > svg {
+  width: 100%;
+  height: 100%;
+}
+.story-copy {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 11px 14px;
+}
+.story-copy h3 {
+  margin: 0;
+  font-size: clamp(14px, 1.25vw, 19px);
+}
+.story-copy > svg {
+  color: #68825a;
+  flex-shrink: 0;
+}
+.place-pill {
+  font-size: 11px;
+  padding: 5px 9px;
+  color: #3c5b42;
+}
+.story-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+.story-pagination .button {
+  min-height: 46px;
+  padding: 9px 17px;
+  font-size: 13px;
+}
+.story-pagination > span {
+  min-width: 90px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+}
+.story-pagination small {
+  display: block;
+  font-size: 10px;
+  color: #596f4e;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* The scene/help share a slot; help never pushes the choices off the screen. */
+body[data-page="game"] #main {
+  gap: 12px;
+}
+.game-top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+  margin: 0;
+}
+.game-top .back-button {
+  min-height: 48px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+.game-question {
+  margin: 0;
+  min-width: 0;
+  text-align: center;
+}
+.game-question h1 {
+  font-size: clamp(21px, 2vw, 33px);
+  line-height: 1.45;
+  letter-spacing: -0.8px;
+  word-break: keep-all;
+}
+.game-question p {
+  font-size: clamp(12px, 1.05vw, 17px);
+  margin-top: 5px;
+  color: #5f7054;
+}
+.lesson-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.lesson-progress {
+  gap: 6px;
+}
+.progress-step {
+  width: 23px;
+  height: 23px;
+  font-size: 10px;
+}
+.game-top .compact {
+  min-height: 44px;
+  padding: 7px 11px;
+  font-size: 12px;
+}
+.lesson-board {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 20px;
+}
+.lesson-evidence {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) clamp(138px, 23vh, 218px);
+  min-height: 0;
+  gap: 12px;
+}
+.scene-slot {
+  min-height: 0;
+  display: flex;
+}
+.scene-panel {
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+}
+.scene-label {
+  padding: 9px 14px;
+  flex-shrink: 0;
+  min-height: 34px;
+  font-size: 12px;
+}
+.scene-panel > svg {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  flex: 1;
+}
+.scene-caption {
+  font-size: 12px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+}
+.clues-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 9px 11px;
+}
+.clues-heading {
+  flex-shrink: 0;
+  margin-bottom: 5px;
+}
+.clues-heading h2 {
+  font-size: clamp(14px, 1.2vw, 18px);
+}
+.clues-heading .text-button {
+  min-height: 44px;
+  padding: 2px 0;
+  font-size: 11px;
+}
+.clues-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8px;
+}
+.clue-card,
+.clue-card.clue-active {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 7px;
+}
+.clue-card.clue-active {
+  padding: 3px 6px;
+}
+.clue-index {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  height: 18px;
+  width: 18px;
+  font-size: 9px;
+}
+.clue-drawing {
+  flex: 1;
+  min-height: 25px;
+  width: 100%;
+  height: auto;
+  max-height: 125px;
+}
+.clue-drawing > svg {
+  height: 100%;
+  width: 100%;
+}
+.clue-description {
+  font-size: clamp(12px, 1.02vw, 16px);
+  line-height: 1.45;
+  text-align: center;
+  flex-shrink: 0;
+}
+.clue-sound {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  margin: 0;
+}
+.clue-sound svg {
+  width: 15px;
+  height: 15px;
+}
+.clues-list:has(> .clue-card:only-child) {
+  display: flex;
+}
+.clues-list > .clue-card:only-child {
+  flex-direction: row;
+  padding: 6px 22px;
+  justify-content: center;
+  min-height: 0;
+  gap: 14px;
+}
+.clues-list > .clue-card:only-child .clue-index {
+  position: absolute;
+}
+.clues-list > .clue-card:only-child .clue-sound {
+  position: absolute;
+  margin: 0;
+}
+.clues-list > .clue-card:only-child .clue-drawing {
+  max-width: 140px;
+  height: 100%;
+}
+.people-section {
+  margin: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.people-heading {
+  margin: 0 0 12px;
+  gap: 12px;
+  min-height: 45px;
+  flex-shrink: 0;
+}
+.people-heading h2 {
+  font-size: clamp(17px, 1.5vw, 23px);
+  line-height: 1.5;
+}
+.people-heading p {
+  font-size: 12px;
+  margin-top: 4px;
+}
+.choice-count {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.candidate-grid {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+  grid-template-rows: minmax(0, 1fr);
+}
+.choices-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.choices-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.choices-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.person-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  padding: 9px 9px 12px;
+}
+.person-portrait,
+.choices-2 .person-portrait,
+.choices-4 .person-portrait {
+  width: 100%;
+  height: auto;
+  flex: 1;
+  min-height: 0;
+  background: #fffdf8;
+}
+.person-portrait > svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  padding: 0;
+}
+.person-name {
+  font-size: clamp(18px, 1.7vw, 28px);
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+.person-status {
+  font-size: clamp(10px, 0.9vw, 14px);
+  flex-shrink: 0;
+  line-height: 1.5;
+  margin-top: 3px;
+  min-height: 15px;
+}
+.person-number {
+  top: 10px;
+  left: 10px;
+}
+.game-bottom,
+.answer-feedback {
+  flex: 0 0 68px;
+  min-height: 68px;
+  margin: 0;
+  padding: 10px 17px;
+  position: static;
+  box-shadow: none;
+}
+.game-bottom {
+  flex-direction: row;
+  align-items: center;
+}
+.game-bottom-actions {
+  align-self: auto;
+}
+.game-bottom .button,
+.answer-feedback .button {
+  min-height: 48px;
+  font-size: clamp(14px, 1.2vw, 18px);
+  padding: 10px 22px;
+}
+.encouragement {
+  font-size: clamp(12px, 1.1vw, 17px);
+}
+.answer-feedback {
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+.answer-feedback h3 {
+  font-size: clamp(19px, 1.7vw, 26px);
+}
+.answer-feedback p {
+  font-size: 12px;
+  margin-top: 3px;
+}
+.answer-feedback > div {
+  max-width: none;
+}
+.answer-feedback .button {
+  width: auto;
+  margin: 0 0 0 auto;
+}
+.feedback-star {
+  width: 42px;
+  height: 42px;
+}
+.help-panel {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 15px;
+  overflow: hidden;
+}
+.help-panel-title {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+}
+.help-panel-title > span {
+  margin-left: 0;
+  font-size: 10px;
+  padding: 4px 6px;
+}
+.help-panel-title > .text-button {
+  margin-left: auto;
+  font-size: 11px;
+  min-height: 44px;
+  padding: 3px;
+}
+.help-panel > p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.help-panel .small-help {
+  display: none;
+}
+.help-compare,
+.help-compare:has(.comparison-people) {
+  flex: 1;
+  min-height: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+.help-object,
+.help-compare:has(.comparison-people) .help-object {
+  flex-direction: row;
+  justify-content: center;
+  gap: 10px;
+  min-height: 0;
+}
+.help-object > svg {
+  height: 100%;
+  max-height: 150px;
+  width: auto;
+  max-width: 75%;
+  min-height: 35px;
+}
+.help-object > strong {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.help-compare:not(:has(.comparison-people)) .help-object {
+  height: 100%;
+}
+.help-compare:has(.comparison-people) .help-object {
+  flex: 0 1 42%;
+}
+.help-compare:has(.comparison-people) .help-object > svg {
+  max-height: 85px;
+}
+.compare-arrow {
+  display: none;
+}
+.comparison-people {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  flex: 1;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-template-columns: none;
+  gap: 8px;
+}
+.comparison-person {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.comparison-person > div {
+  min-height: 0;
+  height: auto;
+  flex: 1;
+  padding: 4px;
+}
+.comparison-person figcaption {
+  font-size: 12px;
+  margin-top: 5px;
+}
+.comparison-person figcaption > span {
+  font-size: 9px;
+  margin-top: 2px;
+}
+.toast {
+  left: 50%;
+  bottom: 14px;
+  max-width: min(560px, calc(100vw - 35px));
+}
+.modal {
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+}
+.storage-warning {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 6px 12px;
+}
+
+/* Teacher controls also keep their save and return controls within reach. */
+body[data-page="settings"] #main {
+  gap: 12px;
+}
+.settings-layout {
+  margin: 0;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 18px;
+}
+.settings-card {
+  min-height: 0;
+  padding: 18px 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  align-content: start;
+}
+.card-title {
+  grid-column: 1/-1;
+  padding: 0 0 10px;
+}
+.card-title h2 {
+  font-size: 17px;
+}
+.setting-row {
+  margin: 0;
+}
+.setting-row legend {
+  font-size: 13px;
+}
+.setting-row > p {
+  font-size: 10px;
+  margin-top: 4px;
+  line-height: 1.6;
+}
+.setting-options {
+  margin-top: 8px;
+  gap: 6px;
+}
+.option-pill > span {
+  min-width: 58px;
+  min-height: 44px;
+  padding: 9px 11px;
+  font-size: 12px;
+}
+.option-pill input:checked + span {
+  padding: 8px 10px;
+}
+.settings-divider {
+  grid-column: 1/-1;
+  margin: 0;
+}
+.toggle-row {
+  margin: 0;
+  gap: 12px;
+}
+.toggle-row > div > label {
+  font-size: 12px;
+}
+.toggle-row p {
+  font-size: 10px;
+  margin-top: 4px;
+  line-height: 1.7;
+}
+.switch {
+  width: 48px;
+  height: 30px;
+}
+.switch input {
+  height: 48px;
+  top: -9px;
+  z-index: 1;
+}
+.switch > span:after {
+  width: 24px;
+  height: 24px;
+}
+.switch input:checked + span:after {
+  transform: translateX(18px);
+}
+.settings-actions {
+  grid-column: 1/-1;
+  margin: 0;
+  padding-top: 12px;
+}
+.settings-footnote {
+  grid-column: 1/-1;
+  margin: -5px 0 0;
+}
+.settings-aside {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 12px;
+}
+.support-guide {
+  padding: 16px 20px;
+}
+.support-guide h2 {
+  font-size: 21px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.guide-step {
+  margin-top: 12px;
+  gap: 8px;
+}
+.guide-step p {
+  font-size: 10px;
+  margin-top: 3px;
+  line-height: 1.65;
+}
+.privacy-note {
+  margin: 0;
+  padding: 0 4px;
+}
+.privacy-note p {
+  font-size: 10px;
+  line-height: 1.7;
+}
+body[data-page="records"] #main {
+  overflow: auto;
+  display: block;
+}
+body[data-page="records"] .page-intro {
+  margin-bottom: 20px;
+}
+.summary-page {
+  width: min(760px, 100%);
+  max-width: 760px;
+  min-height: 0;
+  margin: auto;
+  padding: 22px 32px;
+}
+.summary-medal {
+  width: 62px;
+  height: 62px;
+  box-shadow: 0 0 0 6px #fbf5e2;
+  margin: 0 auto 15px;
+}
+.summary-medal > svg {
+  width: 35px;
+}
+.summary-page .eyebrow {
+  margin-top: 15px;
+  font-size: 8px;
+}
+.summary-page h1 {
+  font-size: 26px;
+  margin-top: 8px;
+}
+.summary-page > p {
+  font-size: 12px;
+  margin-top: 9px;
+}
+.summary-stats {
+  margin: 18px 0;
+  padding: 12px 8px;
+}
+.summary-stats strong {
+  font-size: 26px;
+}
+.summary-stats span {
+  margin-top: 3px;
+}
+.summary-stories > div {
+  padding: 10px 0;
+}
+.summary-actions {
+  margin-top: 18px;
+}
+.summary-page .local-save {
+  margin-top: 12px;
+}
+
+@media (max-height: 760px) and (min-width: 700px) {
+  .topbar {
+    height: 56px;
+    flex-basis: 56px;
+    padding: 0 20px;
+  }
+  .brand > svg {
+    width: 35px;
+  }
+  .brand > span {
+    font-size: 17px;
+  }
+  .brand small {
+    font-size: 8px;
+  }
+  #main {
+    padding: 12px 20px;
+    gap: 10px;
+  }
+  .page-intro {
+    min-height: 43px;
+  }
+  .page-intro h1 {
+    font-size: 24px;
+  }
+  .eyebrow {
+    font-size: 8px;
+    margin-bottom: 3px;
+  }
+  .session-strip {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+  .session-strip-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .session-strip h2 {
+    font-size: 18px;
+  }
+  .session-strip .button {
+    min-height: 48px;
+    padding: 10px 17px;
+    font-size: 14px;
+  }
+  .session-strip p {
+    font-size: 11px;
+  }
+  .story-section {
+    gap: 9px;
+  }
+  .filter {
+    min-height: 44px;
+    padding: 7px 13px;
+    font-size: 12px;
+  }
+  .story-copy {
+    padding: 7px 11px;
+  }
+  .story-copy h3 {
+    font-size: 15px;
+  }
+  .story-pagination .button {
+    min-height: 44px;
+    padding: 7px 14px;
+  }
+  .game-top {
+    gap: 12px;
+  }
+  .game-question h1 {
+    font-size: 23px;
+  }
+  .game-question p {
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .lesson-status {
+    gap: 5px;
+  }
+  .progress-step {
+    width: 19px;
+    height: 19px;
+    font-size: 9px;
+  }
+  .game-top .compact {
+    min-height: 44px;
+    font-size: 11px;
+    padding: 5px 9px;
+  }
+  .lesson-board {
+    gap: 14px;
+  }
+  .lesson-evidence {
+    grid-template-rows: minmax(0, 1fr) 150px;
+    gap: 9px;
+  }
+  .scene-label {
+    font-size: 11px;
+    padding: 6px 11px;
+    min-height: 28px;
+  }
+  .scene-caption {
+    display: none;
+  }
+  .clues-heading {
+    margin-bottom: 2px;
+  }
+  .clues-heading h2 {
+    font-size: 14px;
+  }
+  .clues-heading .text-button {
+    font-size: 10px;
+    min-height: 44px;
+  }
+  .clues-panel {
+    padding: 6px 9px;
+  }
+  .clue-description {
+    font-size: 12px;
+  }
+  .people-heading {
+    margin-bottom: 8px;
+    min-height: 39px;
+  }
+  .people-heading h2 {
+    font-size: 17px;
+  }
+  .people-heading p {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+  .choice-count {
+    font-size: 10px;
+  }
+  .candidate-grid {
+    gap: 8px;
+  }
+  .person-card {
+    padding: 6px 6px 9px;
+  }
+  .person-name {
+    font-size: 19px;
+    margin-top: 6px;
+  }
+  .person-status {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+  .game-bottom,
+  .answer-feedback {
+    min-height: 60px;
+    flex-basis: 60px;
+    padding: 6px 13px;
+  }
+  .game-bottom .button,
+  .answer-feedback .button {
+    padding: 9px 16px;
+    font-size: 14px;
+  }
+  .encouragement {
+    font-size: 12px;
+  }
+  .answer-feedback h3 {
+    font-size: 20px;
+  }
+  .answer-feedback p {
+    font-size: 11px;
+  }
+  .help-panel {
+    padding: 8px 11px;
+  }
+  .help-panel-title {
+    font-size: 12px;
+  }
+  .help-panel > p {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+  .help-panel-title > .text-button {
+    font-size: 10px;
+    min-height: 44px;
+  }
+  .help-compare,
+  .help-compare:has(.comparison-people) {
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .help-object > strong {
+    font-size: 13px;
+  }
+  .help-compare:has(.comparison-people) .help-object > svg {
+    max-height: 55px;
+  }
+  .comparison-person figcaption {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+  .comparison-person figcaption > span {
+    display: none;
+  }
+  .settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settings-aside {
+    display: none;
+  }
+  .settings-card {
+    padding: 12px 24px;
+    gap: 8px 30px;
+  }
+  .setting-row > p {
+    font-size: 10px;
+  }
+  .summary-page {
+    padding: 15px 28px;
+  }
+  .summary-medal {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 10px;
+  }
+  .summary-medal > svg {
+    width: 28px;
+  }
+  .summary-page .eyebrow {
+    display: none;
+  }
+  .summary-page h1 {
+    font-size: 24px;
+    margin-top: 0;
+  }
+  .summary-page > p {
+    margin-top: 6px;
+    font-size: 11px;
+  }
+  .summary-stats {
+    margin: 11px 0;
+    padding: 8px;
+  }
+  .summary-stats strong {
+    font-size: 23px;
+  }
+  .summary-stories > div {
+    padding: 7px 0;
+  }
+  .summary-actions {
+    margin-top: 12px;
+  }
+  .summary-page .local-save {
+    margin-top: 8px;
+    font-size: 9px;
+  }
+}
+@media (min-width: 1800px) and (min-height: 900px) {
+  .topbar {
+    height: 80px;
+    flex-basis: 80px;
+    padding: 0 40px;
+  }
+  #main {
+    padding: 24px 30px;
+    gap: 18px;
+  }
+  .brand > svg {
+    width: 48px;
+  }
+  .brand > span {
+    font-size: 23px;
+  }
+  .fullscreen-button,
+  .teacher-button {
+    height: 56px;
+    min-height: 56px;
+  }
+  .teacher-button {
+    width: 56px;
+  }
+  .lesson-evidence {
+    grid-template-rows: minmax(0, 1fr) clamp(230px, 24vh, 360px);
+  }
+  .clue-description {
+    font-size: 19px;
+  }
+  .game-question h1 {
+    font-size: 35px;
+  }
+  .game-question p,
+  .people-heading p {
+    font-size: 16px;
+  }
+  .game-bottom,
+  .answer-feedback {
+    min-height: 80px;
+    flex-basis: 80px;
+  }
+  .game-bottom .button,
+  .answer-feedback .button {
+    min-height: 58px;
+    font-size: 20px;
+  }
+  .help-panel > p {
+    font-size: 15px;
+  }
+  .help-panel-title {
+    font-size: 17px;
+  }
+  .help-panel-title > .text-button {
+    font-size: 14px;
+  }
+  .comparison-person figcaption {
+    font-size: 16px;
+  }
+  .help-object > strong {
+    font-size: 21px;
+  }
+}
+@media (max-width: 699px) {
+  .topbar {
+    flex-basis: 58px;
+    height: 58px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .app-navigation {
+    gap: 8px;
+  }
+  .brand {
+    gap: 6px;
+  }
+  .brand > svg {
+    width: 31px;
+  }
+  .brand > span {
+    font-size: 14px;
+  }
+  .brand small {
+    display: none;
+  }
+  .header-nav {
+    gap: 4px;
+    margin-left: 2px;
+  }
+  .nav-item {
+    min-height: 40px;
+    padding: 8px;
+  }
+  .nav-item > span {
+    display: none;
+  }
+  .topbar-actions {
+    gap: 7px;
+  }
+  .fullscreen-button {
+    min-height: 42px;
+    padding: 8px 10px;
+    font-size: 11px;
+    gap: 5px;
+  }
+  .teacher-button {
+    width: 42px;
+    height: 42px;
+    min-height: 42px;
+  }
+  #main {
+    padding: 12px;
+    gap: 10px;
+  }
+  .page-intro {
+    min-height: 48px;
+  }
+  .page-intro h1 {
+    font-size: 19px;
+  }
+  .eyebrow {
+    font-size: 8px;
+  }
+  .discovery-count {
+    font-size: 0;
+    gap: 4px;
+  }
+  .discovery-count strong {
+    font-size: 12px;
+  }
+  .discovery-count svg {
+    width: 17px;
+  }
+  .session-strip {
+    padding: 12px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .session-strip-icon {
+    display: none;
+  }
+  .session-strip h2 {
+    font-size: 15px;
+  }
+  .session-strip p {
+    font-size: 10px;
+  }
+  .session-strip .button {
+    width: 100%;
+    min-height: 44px;
+    padding: 9px;
+    font-size: 13px;
+  }
+  .filters {
+    gap: 4px;
+  }
+  .filter {
+    font-size: 9px;
+    min-height: 38px;
+    padding: 7px 8px;
+  }
+  .filter span {
+    font-size: 8px;
+  }
+  .small-label {
+    display: none;
+  }
+  .story-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .story-copy {
+    padding: 9px;
+  }
+  .story-copy h3 {
+    font-size: 12px;
+  }
+  .story-copy > svg {
+    width: 15px;
+  }
+  .place-pill {
+    font-size: 9px;
+    padding: 4px 6px;
+  }
+  .story-pagination {
+    gap: 10px;
+  }
+  .story-pagination .button {
+    font-size: 11px;
+    padding: 8px 11px;
+    min-height: 44px;
+    gap: 5px;
+  }
+  .story-pagination > span {
+    min-width: 65px;
+    font-size: 13px;
+  }
+  .game-top {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 7px;
+  }
+  .game-top .back-button {
+    padding: 6px;
+    min-height: 40px;
+    font-size: 0;
+    gap: 0;
+  }
+  .game-top .back-button svg {
+    width: 21px;
+  }
+  .game-question h1 {
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .game-question p {
+    font-size: 10px;
+    line-height: 1.7;
+  }
+  .lesson-status {
+    gap: 5px;
+  }
+  .progress-step {
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+  }
+  .lesson-progress {
+    gap: 3px;
+  }
+  .game-top .compact {
+    min-height: 34px;
+    padding: 6px;
+    font-size: 0;
+    gap: 0;
+  }
+  .game-top .compact svg {
+    width: 18px;
+  }
+  .lesson-board {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+  .lesson-evidence {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .scene-label {
+    font-size: 9px;
+    min-height: 26px;
+    padding: 6px 8px;
+  }
+  .scene-caption {
+    display: none;
+  }
+  .clues-panel {
+    padding: 6px;
+  }
+  .clues-heading {
+    display: block;
+    margin-bottom: 3px;
+  }
+  .clues-heading h2 {
+    font-size: 11px;
+  }
+  .clues-heading .text-button {
+    display: none;
+  }
+  .clues-list {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .clue-card,
+  .clue-card.clue-active {
+    flex-direction: row;
+    padding: 4px;
+    gap: 3px;
+  }
+  .clue-drawing {
+    width: 43%;
+    max-width: 70px;
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+  }
+  .clue-description {
+    font-size: 9px;
+    flex: 1;
+  }
+  .clue-index {
+    height: 13px;
+    width: 13px;
+    font-size: 7px;
+    left: 2px;
+    top: 2px;
+  }
+  .clue-sound {
+    display: none;
+  }
+  .clues-list > .clue-card:only-child {
+    padding: 6px;
+    gap: 5px;
+    flex-direction: column;
+  }
+  .clues-list > .clue-card:only-child .clue-drawing {
+    max-width: none;
+    width: 100%;
+  }
+  .people-heading {
+    min-height: 29px;
+    margin-bottom: 6px;
+  }
+  .people-heading h2 {
+    font-size: 14px;
+  }
+  .people-heading p {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .choice-count {
+    font-size: 9px;
+  }
+  .candidate-grid {
+    gap: 6px;
+  }
+  .person-card {
+    padding: 4px 4px 6px;
+  }
+  .person-name {
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  .person-status {
+    font-size: 8px;
+    min-height: 12px;
+    margin-top: 1px;
+  }
+  .person-number {
+    top: 6px;
+    left: 6px;
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+  }
+  .game-bottom,
+  .answer-feedback {
+    min-height: 60px;
+    flex-basis: auto;
+    padding: 8px;
+    gap: 8px;
+  }
+  .encouragement {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .encouragement svg {
+    width: 16px;
+  }
+  .game-bottom-actions {
+    gap: 5px;
+  }
+  .game-bottom .button,
+  .answer-feedback .button {
+    min-height: 44px;
+    padding: 8px 10px;
+    font-size: 10px;
+    gap: 5px;
+  }
+  .game-bottom-actions .button svg {
+    width: 16px;
+  }
+  .feedback-star {
+    display: none;
+  }
+  .answer-feedback h3 {
+    font-size: 16px;
+  }
+  .answer-feedback p {
+    font-size: 9px;
+  }
+  .help-panel {
+    padding: 7px;
+  }
+  .help-panel-title {
+    font-size: 10px;
+    gap: 3px;
+  }
+  .help-panel-title > svg {
+    width: 13px;
+  }
+  .help-panel-title > span {
+    font-size: 8px;
+    padding: 3px;
+  }
+  .help-panel-title > .text-button {
+    min-height: 28px;
+    padding: 2px;
+    font-size: 8px;
+    margin-left: 0;
+  }
+  .help-panel-title > .text-button svg {
+    width: 12px;
+  }
+  .help-panel > p {
+    font-size: 8px;
+    line-height: 1.5;
+    margin-top: 3px;
+  }
+  .help-compare,
+  .help-compare:has(.comparison-people) {
+    gap: 4px;
+    margin-top: 3px;
+  }
+  .help-object > strong {
+    font-size: 10px;
+  }
+  .help-object,
+  .help-compare:has(.comparison-people) .help-object {
+    gap: 5px;
+  }
+  .help-compare:has(.comparison-people) .help-object > svg {
+    max-height: 42px;
+  }
+  .comparison-people {
+    gap: 3px;
+  }
+  .comparison-person > div {
+    padding: 2px;
+    border-width: 1px;
+    border-radius: 5px;
+  }
+  .comparison-person figcaption {
+    font-size: 8px;
+    margin-top: 2px;
+  }
+  .comparison-person figcaption > span {
+    display: none;
+  }
+  body[data-page="settings"] #main {
+    overflow: auto;
+  }
+  .settings-layout {
+    display: block;
+    flex: none;
+  }
+  .settings-card {
+    display: block;
+    padding: 20px;
+  }
+  .setting-row {
+    margin-top: 24px;
+  }
+  .settings-divider {
+    margin-top: 24px;
+  }
+  .toggle-row {
+    margin-top: 22px;
+  }
+  .settings-actions {
+    margin-top: 24px;
+  }
+  .settings-footnote {
+    margin-top: 12px;
+  }
+  .settings-aside {
+    display: none;
+  }
+  .summary-page {
+    padding: 22px 16px;
+  }
+  .summary-page h1 {
+    font-size: 21px;
+  }
+  .summary-actions {
+    flex-direction: column;
+  }
+  .summary-stories > div {
+    font-size: 10px;
+  }
+}

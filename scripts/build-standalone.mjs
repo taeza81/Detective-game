@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { dirname, resolve, extname, relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { transformWithEsbuild } from "vite";
@@ -59,6 +59,13 @@ for (const [link] of styleLinks) {
   );
 }
 
+const embeddedImages = {};
+for (const name of await readdir(resolve(build, "art"))) {
+  if (mimeTypes[extname(name)])
+    embeddedImages[name] = await dataUrl(`art/${name}`);
+}
+const imageBootstrap = `window.__DETECTIVE_IMAGES__=${JSON.stringify(embeddedImages)};`;
+
 const scripts = [
   ...html.matchAll(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/g),
 ];
@@ -81,7 +88,8 @@ for (const [tag, reference] of scripts) {
   html = html.replace(tag, "");
   html = html.replace(
     "</body>",
-    () => `<script>${code.replaceAll("</script", "<\\/script")}</script>\n</body>`,
+    () =>
+      `<script>${imageBootstrap}${code.replaceAll("</script", "<\\/script")}</script>\n</body>`,
   );
 }
 
@@ -105,7 +113,10 @@ await mkdir(output, { recursive: true });
 const target = resolve(output, "꼬마탐정단.html");
 // The development source index and this ready-to-open preview are deliberately
 // distinct: opening the source index as a plain file cannot resolve Vite imports.
-html = html.replace(/<a\b[^>]*id="startup-standalone"[^>]*>[\s\S]*?<\/a\s*>/, "");
+html = html.replace(
+  /<a\b[^>]*id="startup-standalone"[^>]*>[\s\S]*?<\/a\s*>/,
+  "",
+);
 await writeFile(target, html);
 await writeFile(resolve(project, "preview.html"), html);
 console.log(

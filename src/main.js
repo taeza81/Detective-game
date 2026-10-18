@@ -1,5 +1,6 @@
 import "@fontsource-variable/noto-sans-kr";
 import "./style.css";
+import "./classroom.css";
 import {
   characters,
   cases,
@@ -13,15 +14,7 @@ import {
   sanitizeSettings,
   isValidSession,
 } from "./data.js";
-import {
-  icon,
-  logo,
-  scene,
-  avatar,
-  avatarCrop,
-  clueArt,
-  heroArt,
-} from "./art.js";
+import { icon, logo, scene, avatar, avatarCrop, clueArt } from "./art.js";
 
 const KEYS = {
   settings: "detective.settings.v1",
@@ -63,10 +56,51 @@ let session = read(KEYS.active, null);
 if (!isValidSession(session) || session.status) session = null;
 let page = "home";
 let filter = "all";
+let storyPage = 0;
+let settingsReturn = "home";
 let modal = null;
 let returnFocus = null;
 let pendingNewId = undefined;
 let toastTimer;
+
+function isFullscreen() {
+  return Boolean(
+    document.fullscreenElement || document.webkitFullscreenElement,
+  );
+}
+
+function updateFullscreenButton() {
+  const control = document.querySelector('[data-action="fullscreen"]');
+  if (!control) return;
+  const active = isFullscreen();
+  control.innerHTML = `${icon(active ? "window" : "fullscreen", 21)}<span>${active ? "창모드" : "전체화면"}</span>`;
+  control.setAttribute(
+    "aria-label",
+    active ? "창모드로 전환" : "전체화면으로 전환",
+  );
+  control.setAttribute("aria-pressed", String(active));
+}
+
+async function toggleFullscreen() {
+  try {
+    if (isFullscreen()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!exit) throw new Error("unsupported");
+      await exit.call(document);
+    } else {
+      const request =
+        document.documentElement.requestFullscreen ||
+        document.documentElement.webkitRequestFullscreen;
+      if (!request) throw new Error("unsupported");
+      await request.call(document.documentElement);
+    }
+    updateFullscreenButton();
+  } catch {
+    toast(
+      "이 브라우저에서는 전체화면을 열 수 없어요. Chrome이나 Edge에서 직접 열어 주세요.",
+    );
+  }
+}
 
 function button(
   text,
@@ -136,28 +170,19 @@ function speak(text) {
 }
 
 function navigation() {
-  const nav = [
+  return `<a class="brand" href="#home" aria-label="꼬마 탐정단 교실 홈">${logo()}<span>꼬마 탐정단<small>그림카드 탐정 교실</small></span></a><nav class="header-nav" aria-label="주 메뉴">${[
     { id: "home", label: "탐정 교실", icon: "home" },
     { id: "records", label: "학습 기록", icon: "chart" },
-    { id: "settings", label: "선생님 설정", icon: "settings" },
-  ];
-  return `<aside class="sidebar">
-    <a class="brand" href="#home" aria-label="꼬마 탐정단 교실 홈">${logo()}<span>꼬마 탐정단<small>LITTLE DETECTIVES</small></span></a>
-    <div class="nav-label">우리의 작은 발견</div>
-    <nav aria-label="주 메뉴">${nav.map((n) => `<button class="nav-item ${page === n.id || (n.id === "home" && ["game", "summary"].includes(page)) ? "active" : ""}" data-action="nav" data-page="${n.id}" ${page === n.id ? 'aria-current="page"' : ""}>${icon(n.icon)}<span>${n.label}</span>${n.id === "home" ? '<span class="nav-dot"></span>' : ""}</button>`).join("")}</nav>
-    <div class="sidebar-bottom"><div class="little-note"><span class="note-icon">${icon("leaf", 24)}</span><strong>천천히, 함께 찾아요.</strong><p>정답보다 중요한 건<br>단서를 살펴보는 과정이에요.</p></div><div class="sidebar-footer">그림으로 배우는 즐거운 교실<span>Made for little discoveries</span></div></div>
-  </aside>`;
+  ]
+    .map(
+      (n) =>
+        `<button class="nav-item ${page === n.id ? "active" : ""}" data-action="nav" data-page="${n.id}" ${page === n.id ? 'aria-current="page"' : ""}>${icon(n.icon, 20)}<span>${n.label}</span></button>`,
+    )
+    .join("")}</nav>`;
 }
 
 function shell(content) {
-  const names = {
-    home: "탐정 교실",
-    game: "탐정 교실",
-    summary: "오늘의 발견",
-    records: "학습 기록",
-    settings: "선생님 설정",
-  };
-  return `${navigation()}<div class="workspace"><header class="topbar"><div class="breadcrumb">우리 동네 꼬마 탐정단<span>/</span><strong>${names[page]}</strong></div><div class="topbar-actions"><span class="safe-note">${icon("heart", 15)} 나의 속도로, 즐겁게</span>${button("선생님 설정", "nav", "teacher-button", "settings", 'data-page="settings"')}</div></header><main id="main" tabindex="-1">${!storageWorks ? '<div class="storage-warning">이 브라우저에 저장할 수 없어요. 창을 닫기 전에 학습 기록을 내려받아 주세요.</div>' : ""}${content}</main><footer class="page-footer"><span>${icon("leaf", 14)} 모든 아이의 작은 발견을 응원해요.</span><span>그림카드 탐정 교실</span></footer></div><div id="live" class="sr-only" role="status" aria-live="polite"></div><div id="toast" role="status" class="toast"></div>${modal ? renderModal() : ""}`;
+  return `<div class="workspace"><header class="topbar"><div class="app-navigation">${navigation()}</div><div class="topbar-actions">${button("전체화면", "fullscreen", "button fullscreen-button", "fullscreen", 'aria-label="전체화면으로 전환" aria-pressed="false"')}${button('<span class="sr-only">선생님 설정</span>', "nav", "teacher-button", "settings", 'data-page="settings" aria-label="선생님 설정" title="선생님 설정"')}</div></header><main id="main" tabindex="-1">${!storageWorks ? '<div class="storage-warning">이 브라우저에는 기록을 저장할 수 없어요. 기록은 내려받아 보관해 주세요.</div>' : ""}${content}</main></div><div id="live" class="sr-only" role="status" aria-live="polite"></div><div id="toast" role="status" class="toast"></div>${modal ? renderModal() : ""}`;
 }
 
 function home() {
@@ -167,44 +192,17 @@ function home() {
     ),
   );
   const list = cases.filter((c) => filter === "all" || c.category === filter);
+  const size = window.innerWidth < 650 ? 4 : 6;
+  const pageCount = Math.ceil(list.length / size);
+  storyPage = Math.max(0, Math.min(storyPage, pageCount - 1));
+  const visible = list.slice(storyPage * size, (storyPage + 1) * size);
   const activeSession = session && !session.status;
-  return `<section class="page-intro"><div><div class="eyebrow"><span class="green-dot"></span> 관찰하고, 생각하고, 발견해요</div><h1>오늘은 어떤 친구를 찾을까요?</h1><p>작은 단서를 하나씩 모아, 우리 동네 이야기를 풀어 봐요.</p></div><span class="classroom-pill">${icon("book", 17)} 그림카드 탐정 교실</span></section>
-    <section class="welcome-card"><div class="welcome-copy"><div class="welcome-label">HELLO, LITTLE DETECTIVE!</div><h2>작은 단서로,<br>큰 발견을 해요<span class="period">.</span></h2><p>눈으로 살펴보고, 귀로 들어 봐요.<br>친구를 찾는 멋진 탐정이 되어 볼까요?</p>${button(activeSession ? "이어서 탐정 수업" : "탐정 수업 시작하기", activeSession ? "resume" : "start", "button primary large", "search")}<span class="hero-caption">${icon("people", 15)} ${settings.choices}명 중 찾기 <i></i> 단서 ${settings.clueCount}개 <i></i> ${settings.sessionLength}개 이야기</span></div><div class="hero-art">${heroArt()}<span class="art-sticker">${icon("spark", 15)} 차근차근 찾으면 돼요!</span></div></section>
-    <div class="home-columns"><section class="story-section"><div class="section-heading"><div><h2>오늘의 탐정 이야기 <span class="count">12</span></h2><p>궁금한 이야기를 골라 시작해도 좋아요.</p></div><span class="small-label">그림 + 음성 단서</span></div>
-    <div class="filters" role="group" aria-label="이야기 종류">${categories.map((c) => `<button class="filter ${filter === c.id ? "selected" : ""}" data-action="filter" data-filter="${c.id}" aria-pressed="${filter === c.id}">${c.name}${c.id === "all" ? " <span>12</span>" : ""}</button>`).join("")}</div>
-    <div class="story-grid">${list.map((item) => `<button class="story-card" data-action="case" data-case="${item.id}" aria-label="${item.title}, ${item.place} 이야기 시작"><div class="story-image">${scene(item, true)}<span class="place-pill">${item.place}</span>${solved.has(item.id) ? `<span class="solved-badge" aria-label="찾아본 이야기">${icon("check", 14)}</span>` : ""}</div><div class="story-copy"><span class="story-number">이야기 ${String(cases.indexOf(item) + 1).padStart(2, "0")}</span><h3>${item.title}</h3><span class="story-link">단서 ${settings.clueCount}개 살펴보기 ${icon("arrow", 17)}</span></div></button>`).join("")}</div></section>
-    <aside class="home-aside"><section class="notebook"><div class="notebook-label">MY DETECTIVE NOTE</div><h2>나의 탐정 수첩 ${icon("book", 21)}</h2><div class="notebook-stat"><strong>${solved.size}<span> / 12</span></strong><p>살펴본 이야기</p></div><div class="mini-progress" role="progressbar" aria-valuemin="0" aria-valuemax="12" aria-valuenow="${solved.size}" aria-label="살펴본 이야기"><span style="width:${(solved.size / 12) * 100}%"></span></div><p class="notebook-message">${solved.size ? "차곡차곡, 발견이 쌓이고 있어요." : "첫 번째 발견을 기다리고 있어요."}</p><div class="notebook-divider"></div><div class="session-info"><span>이번 수업</span><strong>${settings.sessionLength}개 이야기</strong></div><div class="session-info"><span>도움받기</span><strong>${settings.maxHelp ? `${settings.maxHelp}단계까지` : "사용 안 함"}</strong></div>${button("학습 기록 살펴보기", "nav", "text-button", "arrow", 'data-page="records"')}</section>
-    <section class="how-to"><h3>이렇게 찾아봐요</h3>${[
-      {
-        n: "01",
-        title: "그림을 살펴봐요",
-        text: "어떤 일이 있었을까요?",
-        icon: "eye",
-      },
-      {
-        n: "02",
-        title: "단서를 모아요",
-        text: "옷과 모자를 잘 봐요.",
-        icon: "search",
-      },
-      {
-        n: "03",
-        title: "친구를 찾아요",
-        text: "단서와 같은 친구를 골라요.",
-        icon: "people",
-      },
-    ]
-      .map(
-        (s) =>
-          `<div class="how-step"><span class="how-icon">${icon(s.icon, 20)}</span><div><strong>${s.title}</strong><p>${s.text}</p></div><span class="step-no">${s.n}</span></div>`,
-      )
-      .join("")}</section>
-    <div class="gentle-note">${icon("heart", 19)}<p>서두르지 않아도 괜찮아요.<br><strong>필요할 때 도움을 받아요.</strong></p></div></aside></div>`;
+  return `<section class="page-intro"><div><div class="eyebrow">관찰하고, 생각하고, 발견해요</div><h1>오늘은 어떤 친구를 찾을까요?</h1></div><span class="discovery-count">${icon("book", 20)} 살펴본 이야기 <strong>${solved.size} / 12</strong></span></section><section class="session-strip"><span class="session-strip-icon">${icon("search", 30)}</span><div><h2>작은 단서를 모아, 친구를 찾아요!</h2><p>${settings.choices}명 중 찾기 · 단서 ${settings.clueCount}개 · 한 수업 ${settings.sessionLength}개 이야기</p></div>${button(activeSession ? "이어서 탐정 수업" : "탐정 수업 시작하기", activeSession ? "resume" : "start", "button primary large", "arrow")}</section><section class="story-section" aria-label="탐정 이야기"><div class="story-toolbar"><div class="filters" role="group" aria-label="이야기 종류">${categories.map((c) => `<button class="filter ${filter === c.id ? "selected" : ""}" data-action="filter" data-filter="${c.id}" aria-pressed="${filter === c.id}">${c.name}${c.id === "all" ? " <span>12</span>" : ""}</button>`).join("")}</div><span class="small-label">궁금한 그림을 눌러 시작해요</span></div><div class="story-grid">${visible.map((item) => `<button class="story-card" data-action="case" data-case="${item.id}" aria-label="${item.title}, ${item.place} 이야기 시작"><div class="story-image">${scene(item, true)}<span class="place-pill">${item.place}</span>${solved.has(item.id) ? `<span class="solved-badge" aria-label="찾아본 이야기">${icon("check", 16)}</span>` : ""}</div><div class="story-copy"><h3>${item.title}</h3>${icon("arrow", 20)}</div></button>`).join("")}</div><div class="story-pagination">${button("이전 이야기", "story-page", "button secondary", "back", `data-direction="-1" ${storyPage === 0 ? "disabled" : ""}`)}<span role="status">${storyPage + 1} / ${pageCount}<small>총 ${list.length}개 이야기</small></span>${button("다음 이야기", "story-page", "button secondary", "arrow", `data-direction="1" ${storyPage >= pageCount - 1 ? "disabled" : ""}`)}</div></section>`;
 }
 
 function clueCard(tag, index, active, large = false) {
   const clue = clues[tag];
-  return `<button class="clue-card ${active ? "clue-active" : ""} ${large ? "large-clue" : ""}" data-action="clue" data-index="${index}" aria-label="단서 ${index + 1}, ${clue.text} 듣기" aria-pressed="${active}"><span class="clue-index">${index + 1}</span><span class="clue-drawing">${clueArt(clue.icon, clue.color)}</span><span class="clue-description">${clue.text}</span><span class="clue-sound">${icon("sound", 16)}</span></button>`;
+  return `<button class="clue-card ${active ? "clue-active" : ""} ${large ? "large-clue" : ""}" data-action="clue" data-index="${index}" aria-label="단서 ${index + 1}, ${clue.text} 듣기" aria-pressed="${active}"><span class="clue-index">${index + 1}</span><span class="clue-drawing">${clueArt(clue.icon, clue.color, currentCase().answer)}</span><span class="clue-description">${clue.text}</span><span class="clue-sound">${icon("sound", 16)}</span></button>`;
 }
 
 function helpPanel(round, tags) {
@@ -218,7 +216,7 @@ function helpPanel(round, tags) {
     "그림 단서와 친구의 모습을 나란히 비교해요.",
     "이 단서에 맞지 않는 친구를 흐리게 했어요. 남은 친구를 살펴봐요.",
   ];
-  return `<section class="help-panel" aria-label="${round.helpLevel}단계 도움"><div class="help-panel-title">${icon("search", 19)}<strong>${helpNames[round.helpLevel]}</strong><span>${round.helpLevel}단계</span></div><p>${instructions[round.helpLevel]}</p>${round.helpLevel >= 3 ? '<p class="small-help">단서 그림과 친구들의 같은 부분을 비교해요. 아래에서 친구를 골라요.</p>' : ""}<div class="help-compare"><div class="help-object">${clueArt(clue.icon, clue.color)}<strong>${clue.label}</strong></div>${
+  return `<section class="help-panel" aria-label="${round.helpLevel}단계 도움"><div class="help-panel-title">${icon("search", 19)}<strong>${helpNames[round.helpLevel]}</strong><span>${round.helpLevel}단계</span>${button("상황 그림", "show-scene", "text-button", "eye")}</div><p>${instructions[round.helpLevel]}</p>${round.helpLevel >= 3 ? '<p class="small-help">단서 그림과 친구들의 같은 부분을 비교해요. 단서와 같은 친구를 골라요.</p>' : ""}<div class="help-compare"><div class="help-object">${clueArt(clue.icon, clue.color, currentCase().answer)}<strong>${clue.label}</strong></div>${
     round.helpLevel >= 3
       ? `<span class="compare-arrow">${icon("arrow", 28)}</span><div class="comparison-people">${round.candidates
           .map((id) => {
@@ -240,24 +238,21 @@ function game() {
   const focus = clues[tags[round.focusClue]];
   const incorrect = round.attempts.length > 0 && !round.solved;
   const winner = characters.find((p) => p.id === item.answer);
-  return `<div class="game-top">${button("교실로", "exit", "text-button back-button", "back")}<div class="lesson-progress" aria-label="${config.sessionLength}문제 중 ${session.index + 1}번째">${session.rounds.map((r, i) => `<span class="progress-step ${r.solved ? "done" : i === session.index ? "current" : ""}">${r.solved ? icon("check", 14) : i + 1}</span>${i < session.rounds.length - 1 ? '<span class="progress-line"></span>' : ""}`).join("")}<span class="progress-caption">${session.index + 1} / ${config.sessionLength} 이야기</span></div>${button("다시 듣기", "read-question", "button secondary compact", "sound")}</div>
-    <section class="game-question"><span class="eyebrow">이야기 ${String(cases.indexOf(item) + 1).padStart(2, "0")} · ${item.place}</span><h1>${item.question}</h1><p>${item.situation}</p></section>
-    <div class="investigation-grid"><section class="scene-panel"><div class="scene-label">${icon("eye", 17)} 어떤 일이 있었을까요?</div>${scene(item)}<div class="scene-caption">${icon("search", 17)} 그림 속 사람을 단서로 찾아요.</div></section><section class="clues-panel" aria-label="그림 단서"><div class="clues-heading"><h2>단서를 살펴봐요 <span>${tags.length}</span></h2>${button("모두 듣기", "read-clues", "text-button", "sound")}</div><p>그림을 누르면 단서를 들을 수 있어요.</p><div class="clues-list">${tags.map((tag, i) => clueCard(tag, i, round.focusClue === i && round.helpLevel > 0)).join("")}</div>${config.maxHelp > 0 && !round.solved ? button(round.helpLevel ? (round.helpLevel >= config.maxHelp ? "도움 다시 듣기" : "도움 더 받기") : "도와주세요", "help-top", "button help-button clue-help", "search") : ""}</section></div>
-    ${helpPanel(round, tags)}
-    <section class="people-section" aria-labelledby="people-title"><div class="people-heading"><div><h2 id="people-title">${round.solved ? "단서와 같은 친구를 찾았어요!" : "누구일까요? 친구를 골라요."}</h2><p>${round.solved ? `${winner.name}의 모습과 단서를 함께 확인해요.` : config.confirmAnswer ? "친구를 고른 뒤 ‘이 사람이에요’를 눌러요." : "단서와 같은 모습을 찾아 눌러 주세요."}</p></div><span class="choice-count">${icon("people", 17)} ${config.choices}명 중 찾기</span></div><div class="candidate-grid choices-${config.choices}">${round.candidates
-      .map((id) => {
-        const person = characters.find((p) => p.id === id);
-        const faded =
-          round.helpLevel >= 4 &&
-          !person.tags.includes(tags[round.focusClue]) &&
-          !round.solved;
-        const isWrong = round.attempts.some(
-          (a) => a.personId === id && !a.correct,
-        );
-        return `<button class="person-card ${round.selected === id ? "person-selected" : ""} ${round.solved && id === item.answer ? "person-correct" : ""} ${faded ? "person-faded" : ""}" data-action="person" data-person="${id}" aria-label="${person.name}. ${person.description}${faded ? ". 지금 단서와 달라요" : ""}" aria-pressed="${round.selected === id}" ${round.solved ? "disabled" : ""}><span class="person-number">${round.candidates.indexOf(id) + 1}</span>${round.solved && id === item.answer ? `<span class="person-check">${icon("check", 19)}</span>` : ""}<div class="person-portrait" style="--portrait:${person.color}">${avatar(person, round.helpLevel >= 2 && !round.solved ? focus.part : "")}</div><span class="person-name">${person.name}</span><span class="person-status">${round.solved && id === item.answer ? "단서와 같아요" : faded ? "이 단서와 달라요" : isWrong ? "단서를 다시 비교해요" : "이 친구일까요?"}</span></button>`;
-      })
-      .join("")}</div></section>
-    ${round.solved ? `<section class="answer-feedback" aria-label="정답 확인"><span class="feedback-star">${icon("star", 28)}</span><div><h3>맞아요! ${winner.name}예요.</h3><p>${tags.map((t) => clues[t].label).join(", ")}가 단서와 같아요.</p><div class="match-tags">${tags.map((t) => `<span>${icon("check", 14)} ${clues[t].label}</span>`).join("")}</div></div>${button(session.index === session.rounds.length - 1 ? "오늘의 발견 보기" : "다음 이야기", "next", "button primary", "arrow")}</section>` : `<div class="game-bottom"><div class="encouragement ${incorrect ? "retry-message" : ""}">${icon(incorrect ? "search" : "heart", 22)}<span>${incorrect ? "괜찮아요. 그림 단서와 다시 비교해 볼까요?" : "천천히 살펴봐요. 도움이 필요하면 눌러 주세요."}</span></div><div class="game-bottom-actions">${config.maxHelp > 0 ? button(round.helpLevel ? (round.helpLevel >= config.maxHelp ? "도움 다시 듣기" : "도움 더 받기") : "도와주세요", "help", "button help-button", "search") : ""}${config.confirmAnswer ? button("이 사람이에요", "submit", "button primary", "check", round.selected ? "" : "disabled") : ""}</div></div>`}`;
+  const showHelp =
+    round.helpLevel > 0 && round.helpVisible !== false && !round.solved;
+  return `<div class="game-top">${button("교실로", "exit", "button secondary back-button", "back")}<section class="game-question"><h1>${item.question}</h1><p>${item.situation}</p></section><div class="lesson-status"><div class="lesson-progress" aria-label="${config.sessionLength}문제 중 ${session.index + 1}번째">${session.rounds.map((r, i) => `<span class="progress-step ${r.solved ? "done" : i === session.index ? "current" : ""}">${r.solved ? icon("check", 14) : i + 1}</span>`).join("")}</div>${button("다시 듣기", "read-question", "button secondary compact", "sound")}</div></div><div class="lesson-board"><div class="lesson-evidence"><div class="scene-slot">${showHelp ? helpPanel(round, tags) : `<section class="scene-panel"><div class="scene-label">${icon("eye", 18)} 상황 그림 · ${item.place}</div>${scene(item)}<div class="scene-caption">${item.situation}</div></section>`}</div><section class="clues-panel" aria-label="그림 단서"><div class="clues-heading"><h2>단서를 살펴봐요</h2>${button("모두 듣기", "read-clues", "text-button", "sound")}</div><div class="clues-list">${tags.map((tag, i) => clueCard(tag, i, round.focusClue === i && round.helpLevel > 0)).join("")}</div></section></div><section class="people-section" aria-labelledby="people-title"><div class="people-heading"><div><h2 id="people-title">${round.solved ? "단서와 같은 친구를 찾았어요!" : "누구일까요? 친구를 골라요."}</h2><p>${config.confirmAnswer && !round.solved ? "친구를 고르고 ‘이 사람이에요’를 눌러요." : "그림 단서와 같은 모습을 찾아요."}</p></div><span class="choice-count">${config.choices}명 중 찾기</span></div><div class="candidate-grid choices-${config.choices}">${round.candidates
+    .map((id) => {
+      const person = characters.find((p) => p.id === id);
+      const faded =
+        round.helpLevel >= 4 &&
+        !person.tags.includes(tags[round.focusClue]) &&
+        !round.solved;
+      const wrong = round.attempts.some((a) => a.personId === id && !a.correct);
+      return `<button class="person-card ${round.selected === id ? "person-selected" : ""} ${round.solved && id === item.answer ? "person-correct" : ""} ${faded ? "person-faded" : ""}" data-action="person" data-person="${id}" aria-label="${person.name}. ${person.description}${faded ? ". 지금 단서와 달라요" : ""}" aria-pressed="${round.selected === id}" ${round.solved ? "disabled" : ""}><span class="person-number">${round.candidates.indexOf(id) + 1}</span>${round.solved && id === item.answer ? `<span class="person-check">${icon("check", 20)}</span>` : ""}<div class="person-portrait" style="--portrait:${person.color}">${avatar(person, round.helpLevel >= 2 && !round.solved ? focus.part : "")}</div><span class="person-name">${person.name}</span><span class="person-status">${round.solved && id === item.answer ? "단서와 같아요" : faded ? "이 단서와 달라요" : wrong ? "다시 비교해요" : "이 친구일까요?"}</span></button>`;
+    })
+    .join(
+      "",
+    )}</div></section></div>${round.solved ? `<section class="answer-feedback" aria-label="정답 확인"><span class="feedback-star">${icon("star", 26)}</span><div><h3>맞아요! ${winner.name}예요.</h3><p>${tags.map((t) => clues[t].label).join(", ")}가 단서와 같아요.</p></div>${button(session.index === session.rounds.length - 1 ? "오늘의 발견 보기" : "다음 이야기", "next", "button primary", "arrow")}</section>` : `<div class="game-bottom"><div class="encouragement ${incorrect ? "retry-message" : ""}">${icon(incorrect ? "search" : "heart", 22)}<span>${incorrect ? "괜찮아요. 단서와 다시 비교해 볼까요?" : "천천히 살펴봐요. 도움이 필요하면 눌러요."}</span></div><div class="game-bottom-actions">${config.maxHelp > 0 ? button(round.helpLevel ? (round.helpLevel >= config.maxHelp ? "도움 다시 듣기" : "도움 더 받기") : "도와주세요", "help", "button help-button", "search") : ""}${config.confirmAnswer ? button("이 사람이에요", "submit", "button primary", "check", round.selected ? "" : "disabled") : ""}</div></div>`}`;
 }
 
 function totals(list) {
@@ -300,7 +295,7 @@ function toggleSetting(key, title, description) {
   return `<div class="toggle-row"><div><label for="${key}">${title}</label><p id="${key}-description">${description}</p></div><label class="switch"><input type="checkbox" id="${key}" name="${key}" aria-describedby="${key}-description" ${draft[key] ? "checked" : ""}><span aria-hidden="true"></span></label></div>`;
 }
 function settingsPage() {
-  return `<section class="page-intro"><div><div class="eyebrow">TEACHER’S DESK</div><h1>아이의 속도에 맞춰요</h1><p>선택지와 단서, 도움 수준을 조절해 수업을 준비해 주세요.</p></div><span class="classroom-pill">${icon("settings", 17)} 선생님 설정</span></section><div class="settings-layout"><form id="settings-form" class="settings-card"><div class="card-title">${icon("book", 22)}<h2>수업 구성</h2></div>${choiceSetting(
+  return `<section class="page-intro"><div><div class="eyebrow">TEACHER’S DESK</div><h1>아이의 속도에 맞춰요</h1><p>선택지와 단서, 도움 수준을 조절해 수업을 준비해 주세요.</p></div>${button(settingsReturn === "game" ? "수업으로 돌아가기" : "교실로 돌아가기", "nav", "button secondary", "back", `data-page="${settingsReturn === "game" ? "game" : "home"}"`)}</section><div class="settings-layout"><form id="settings-form" class="settings-card"><div class="card-title">${icon("book", 22)}<h2>수업 구성</h2></div>${choiceSetting(
     "choices",
     "선택할 인물 수",
     "차이가 뚜렷한 2명으로 시작해 조금씩 늘려 주세요.",
@@ -387,6 +382,7 @@ function renderModal() {
 }
 
 function render(focusMain = false) {
+  document.body.dataset.page = page;
   app.innerHTML = shell(
     page === "home"
       ? home()
@@ -398,7 +394,8 @@ function render(focusMain = false) {
             ? settingsPage()
             : recordsPage(),
   );
-  document.querySelectorAll(".sidebar, .workspace").forEach((el) => {
+  updateFullscreenButton();
+  document.querySelectorAll(".workspace").forEach((el) => {
     el.inert = Boolean(modal);
   });
   if (modal) document.querySelector(".modal button")?.focus();
@@ -407,7 +404,11 @@ function render(focusMain = false) {
 }
 function navigate(next) {
   stopSpeech();
-  if (next === "settings") draft = { ...settings };
+  if (next === "settings") {
+    settingsReturn = page === "settings" ? settingsReturn : page;
+    draft = { ...settings };
+  }
+  if (next === "game" && !session) next = "home";
   page = next;
   modal = null;
   render(true);
@@ -557,13 +558,22 @@ app.addEventListener("click", (event) => {
   const el = event.target.closest("[data-action]");
   if (!el || el.disabled) return;
   const action = el.dataset.action;
-  if (action === "nav") navigate(el.dataset.page);
+  if (action === "fullscreen") toggleFullscreen();
+  else if (action === "nav") navigate(el.dataset.page);
   else if (action === "filter") {
     filter = el.dataset.filter;
+    storyPage = 0;
     render();
     document
       .querySelector(`[data-filter="${filter}"]`)
       ?.focus({ preventScroll: true });
+  } else if (action === "story-page") {
+    storyPage += Number(el.dataset.direction);
+    render();
+  } else if (action === "show-scene") {
+    currentRound().helpVisible = false;
+    persistActive();
+    render();
   } else if (action === "start") begin();
   else if (action === "case") begin(el.dataset.case);
   else if (action === "resume") {
@@ -599,6 +609,7 @@ app.addEventListener("click", (event) => {
     );
   else if (action === "clue") {
     currentRound().focusClue = Number(el.dataset.index);
+    if (currentRound().helpLevel) currentRound().helpVisible = true;
     persistActive();
     const tag = currentCase().clues[currentRound().focusClue];
     render();
@@ -610,18 +621,13 @@ app.addEventListener("click", (event) => {
     const r = currentRound();
     if (r.solved || session.settings.maxHelp === 0) return;
     r.helpLevel = Math.min(session.settings.maxHelp, r.helpLevel + 1);
+    r.helpVisible = true;
     persistActive();
     render();
     const clue = clues[currentCase().clues[r.focusClue]];
     speak(
       `${helpNames[r.helpLevel]}. ${clue.text} ${r.helpLevel >= 2 ? `친구들의 ${clue.part} 부분을 살펴봐요.` : ""}`,
     );
-    document.querySelector(".help-panel")?.scrollIntoView({
-      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "instant"
-        : "smooth",
-      block: "nearest",
-    });
     document
       .querySelector(`[data-action="${action}"]`)
       ?.focus({ preventScroll: true });
@@ -709,4 +715,13 @@ document.addEventListener("click", (event) => {
   }
 });
 window.addEventListener("pagehide", stopSpeech);
+document.addEventListener("fullscreenchange", updateFullscreenButton);
+document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (page === "home" && !modal) render();
+  }, 120);
+});
 render();

@@ -28,7 +28,7 @@ def correct_choice(page):
 
 
 def navigate(page, target):
-    page.locator(f'.nav-item[data-page="{target}"]').click()
+    (page.locator('.teacher-button') if target == 'settings' else page.locator(f'.nav-item[data-page="{target}"]')).click()
 
 
 def no_overflow(page, label):
@@ -49,7 +49,7 @@ with sync_playwright() as p:
     expect(page.locator('.skip-link')).to_be_focused()
     page.keyboard.press('Enter')
     expect(page.locator('#main')).to_be_focused()
-    expect(page.locator('.story-card')).to_have_count(12)
+    expect(page.locator('.story-card')).to_have_count(6)
     page.locator('[data-filter="kind"]').click()
     expect(page.locator('.story-card')).to_have_count(4)
     page.locator('[data-filter="all"]').click()
@@ -95,7 +95,7 @@ with sync_playwright() as p:
     page.screenshot(path=str(OUT / 'desktop-summary.png'), full_page=True)
 
     navigate(page, 'home')
-    expect(page.locator('.welcome-copy [data-action="start"]')).to_be_visible()
+    expect(page.locator('.session-strip [data-action="start"]')).to_be_visible()
     assert not page.locator('[data-action="resume"]').count()
     navigate(page, 'records')
     page.locator('.session-record summary').click()
@@ -126,7 +126,7 @@ with sync_playwright() as p:
     expect(page.locator('#confirmAnswer')).to_be_checked()
     page.screenshot(path=str(OUT / 'desktop-settings.png'), full_page=True)
     navigate(page, 'home')
-    page.locator('.welcome-copy [data-action="start"]').click()
+    page.locator('.session-strip [data-action="start"]').click()
     expect(page.locator('.person-card')).to_have_count(4)
     expect(page.locator('.clue-card')).to_have_count(1)
     expect(page.locator('.progress-step')).to_have_count(5)
@@ -173,7 +173,7 @@ with sync_playwright() as p:
     page.locator('#autoVoice').uncheck()
     page.locator('button[type="submit"]').click()
     navigate(page, 'home')
-    page.locator('.welcome-copy [data-action="start"]').click()
+    page.locator('.session-strip [data-action="start"]').click()
     expect(page.locator('.person-card')).to_have_count(2)
     expect(page.locator('.clue-card')).to_have_count(2)
     assert not page.locator('[data-action="help"], [data-action="help-top"]').count()
@@ -192,6 +192,8 @@ with sync_playwright() as p:
     story_page = authored.new_page()
     story_page.goto(BASE, wait_until='networkidle')
     for case_id, answer_id in ANSWERS.items():
+        if not story_page.locator(f'[data-case="{case_id}"]').count():
+            story_page.locator('[data-action="story-page"][data-direction="1"]').click()
         story_page.locator(f'[data-case="{case_id}"]').click()
         story_page.locator(f'[data-person="{answer_id}"]').click()
         expect(story_page.locator('.answer-feedback')).to_be_visible()

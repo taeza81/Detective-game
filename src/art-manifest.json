@@ -1,0 +1,98 @@
+{
+  "people.png": {
+    "width": 1536,
+    "height": 1024,
+    "bytes": 1936391
+  },
+  "clues.png": {
+    "width": 1402,
+    "height": 1122,
+    "bytes": 2144993
+  },
+  "scenes-b.png": {
+    "width": 1254,
+    "height": 1254,
+    "bytes": 2756000,
+    "cells": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 622,
+        "height": 411
+      },
+      {
+        "x": 633,
+        "y": 0,
+        "width": 621,
+        "height": 411
+      },
+      {
+        "x": 0,
+        "y": 421,
+        "width": 622,
+        "height": 411
+      },
+      {
+        "x": 633,
+        "y": 421,
+        "width": 621,
+        "height": 411
+      },
+      {
+        "x": 0,
+        "y": 842,
+        "width": 622,
+        "height": 412
+      },
+      {
+        "x": 633,
+        "y": 842,
+        "width": 621,
+        "height": 412
+      }
+    ]
+  },
+  "scenes-a.png": {
+    "width": 1254,
+    "height": 1254,
+    "bytes": 2621651,
+    "cells": [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 622,
+        "height": 393
+      },
+      {
+        "x": 632,
+        "y": 0,
+        "width": 622,
+        "height": 393
+      },
+      {
+        "x": 0,
+        "y": 400,
+        "width": 622,
+        "height": 415
+      },
+      {
+        "x": 632,
+        "y": 400,
+        "width": 622,
+        "height": 415
+      },
+      {
+        "x": 0,
+        "y": 823,
+        "width": 622,
+        "height": 431
+      },
+      {
+        "x": 632,
+        "y": 823,
+        "width": 622,
+        "height": 431
+      }
+    ]
+  }
+}
